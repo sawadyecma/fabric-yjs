@@ -43,11 +43,11 @@ export const createYDoc = ({
 
   provider.on("sync", () => {
     console.log(mySharedArray.toJSON());
-    // if (mySharedArray.length === 0) {
-    //   for (let i = 0; i < 1000; i++) {
-    //     pushArrayItem(`Item ${i + 1}`);
-    //   }
-    // }
+    if (mySharedArray.length === 0) {
+      for (let i = 0; i < 1000; i++) {
+        pushArrayItem(`Item ${i + 1}`);
+      }
+    }
   });
 
   mySharedArray.observe((event) => {
@@ -79,18 +79,4 @@ export const pushArrayItem = (item: string) => {
 
   console.log("Pushing item to shared array:", item);
   docStore.sharedArray.push([item]);
-};
-
-const deleteArrayItem = (index: number) => {
-  if (!docStore.sharedArray) {
-    console.warn("Shared array is not initialized.");
-    return;
-  }
-
-  if (index < 0 || index >= docStore.sharedArray.length) {
-    console.warn("Index out of bounds for shared array deletion:", index);
-    return;
-  }
-
-  docStore.sharedArray.delete(index);
 };
