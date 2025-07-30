@@ -1,3 +1,5 @@
+import "./main.css";
+
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <h1>Yjs Vanilla Client</h1>
@@ -163,6 +165,20 @@ document
         const items = docStore.sharedArray?.toArray() || [];
         items.forEach((item, index) => {
           const newRow = document.createElement("tr");
+          newRow.draggable = true;
+          newRow.addEventListener("dragover", (event) => {
+            // ドロップできるように既定の動作を停止
+            event.preventDefault();
+          });
+          newRow.addEventListener("drop", (event) => {
+            const rect = newRow.getBoundingClientRect();
+            const { clientY } = event;
+            if (clientY < rect.top + rect.height / 2) {
+              console.log("Dropped on the top half");
+            } else {
+              console.log("Dropped on the bottom half");
+            }
+          });
           const itemTd = document.createElement("td");
           itemTd.textContent = item;
           newRow.appendChild(itemTd);
