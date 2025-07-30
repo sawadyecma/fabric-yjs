@@ -1,0 +1,27 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "y-sweet": "y-sweet serve --auth 1kTvAVjzIzR5k1YslXbFxEr4SQ_4FlR6EaCEIlkW local",
+    "dev": "tsx watch src/index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "tsx": "^4.20.3",
+    "y-sweet": "^0.8.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.1.0",
+    "@y-sweet/sdk": "^0.8.2",
+    "typescript": "^5.8.3"
+  }
+}

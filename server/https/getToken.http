@@ -1,0 +1,9 @@
+@hostname=http://localhost:3000
+
+### Get server token
+POST {{hostname}}/api/get-token
+Content-Type: application/json
+
+{
+  "docId": "abcde"
+}
