@@ -24,7 +24,12 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 import { CONFIG } from "./utils/config";
 import { ApiClient } from "./utils/api-client";
-import { createYDoc, todoListStore, type TodoItem } from "./yjs-util";
+import {
+  createYDoc,
+  logTodoList,
+  todoListStore,
+  type TodoItem,
+} from "./yjs-util";
 import { showToast } from "./utils/toast";
 import { generateUUID } from "./utils/uuid";
 
@@ -76,6 +81,17 @@ const createTodoItemDom = (item: TodoItem) => {
   return tr;
 };
 
+const renderTodoList = () => {
+  if (!todoListStore) return;
+  const ids = todoListStore.order.toArray();
+  for (const id of ids) {
+    const item = todoListStore.itemMap.get(id);
+    if (item) {
+      tBodyDom.appendChild(createTodoItemDom(item));
+    }
+  }
+};
+
 const main = async () => {
   const queryString = window.location.search;
   const params = new URLSearchParams(queryString);
@@ -86,25 +102,44 @@ const main = async () => {
     return;
   }
 
-  const todoListStore = await connectWithDoc(docId);
+  const { todoListStore, provider } = await connectWithDoc(docId);
 
-  todoListStore.order.observe((event) => {
-    event.delta.forEach((delta) => {
-      if (delta.insert) {
-        if (!Array.isArray(delta.insert)) {
-          console.log(`delta.insert(${delta.insert}) is not array`);
-          return;
-        }
+  logTodoList();
 
-        const item = todoListStore.itemMap.get(delta.insert[0]);
-        if (item) {
-          tBodyDom.appendChild(createTodoItemDom(item));
+  const startObserve = () => {
+    todoListStore.order.observe((event) => {
+      logTodoList();
+
+      event.delta.forEach((delta) => {
+        let index = 0;
+        if (delta.insert) {
+          if (!Array.isArray(delta.insert)) {
+            console.log(`delta.insert(${delta.insert}) is not array`);
+            return;
+          }
+
+          const inserts: string[] = delta.insert;
+          for (const insert of inserts) {
+            const item = todoListStore.itemMap.get(insert);
+            if (item) {
+              showToast(`inserted item: ${item.title}`);
+              tBodyDom.appendChild(createTodoItemDom(item));
+            }
+          }
+        } else if (delta.retain) {
+          index += delta.retain;
+        } else {
+          console.log("delta is neither insert nor retain");
+          debugger;
         }
-      } else {
-        console.log("delta is not insert");
-        debugger;
-      }
+      });
     });
+  };
+
+  provider.on("synced", () => {
+    renderTodoList();
+    showToast("synced");
+    startObserve();
   });
 };
 

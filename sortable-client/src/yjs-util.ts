@@ -36,5 +36,23 @@ export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
     order,
   };
 
-  return todoListStore;
+  return { todoListStore, provider };
+};
+
+export const logTodoList = () => {
+  if (!todoListStore) {
+    console.log("todoListStore is empty");
+    return;
+  }
+
+  console.log({ itemMap: mapToRecord(todoListStore.itemMap) });
+  console.log({ order: todoListStore.order.toArray() });
+};
+
+const mapToRecord = (map: Y.Map<TodoItem>) => {
+  const tmpMap: Record<string, TodoItem> = {};
+  map.forEach((value, key) => {
+    tmpMap[key] = value;
+  });
+  return tmpMap;
 };

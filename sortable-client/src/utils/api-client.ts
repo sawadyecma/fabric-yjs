@@ -19,7 +19,7 @@ export class ApiClient {
 
       if (response.ok) {
         const data = await response.json();
-        return { ok: true, data: data };
+        return { ok: true, data: data.clientToken };
       } else {
         const errorData = await response.json();
         return {
