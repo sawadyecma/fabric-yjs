@@ -2,7 +2,7 @@ import * as Y from "yjs";
 import { createYjsProvider } from "@y-sweet/client";
 import type { ClientToken } from "@y-sweet/sdk";
 
-type TodoItem = {
+export type TodoItem = {
   id: string;
   title: string;
   completed: boolean;
@@ -13,13 +13,10 @@ type TodoListMap = {
   [key: string]: TodoItem;
 };
 
-export const todoListStore: {
-  order: Y.Map<string> | null;
-  itemMap: Y.Array<string> | null;
-} = {
-  order: null,
-  itemMap: null,
-};
+export let todoListStore: {
+  order: Y.Array<string>;
+  itemMap: Y.Map<TodoItem>;
+} | null = null;
 
 export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
   // Create the Yjs doc and link it to the Y-Sweet server:
@@ -34,8 +31,10 @@ export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
   const itemMap = doc.getMap<TodoItem>("itemMap");
   const order = doc.getArray<string>("order");
 
-  return {
+  todoListStore = {
     itemMap,
     order,
   };
+
+  return todoListStore;
 };
