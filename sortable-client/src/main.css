@@ -1,0 +1,7 @@
+#shared-array {
+  border-collapse: collapse;
+}
+
+#shared-array tbody tr {
+  border: solid #ccc 1px;
+}
