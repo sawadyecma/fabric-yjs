@@ -57,13 +57,7 @@ const sendForward = (id: string) => {
   const item = store.itemMap.get(id);
   if (!item) return;
 
-  // ['a', 'b', 'c', 'd', 'e']
-  // cを前に移動させる index:2
-  //
-  // delete(2)
-  // ['a', 'b', 'd', 'e'],
-  // insert(1, 'c')
-  // ['a', 'c', 'b', 'd', 'e']
+  // 新しいアイテムを作成することで、同じObjectが一時的に存在できるようにする
   const newItem = {
     ...item,
     id: generateUUID(),
@@ -75,12 +69,6 @@ const sendForward = (id: string) => {
     store.itemMap.set(newItem.id, newItem);
     store.itemMap.delete(id);
   });
-
-  // delta
-  // retain: 1
-  // insert: ['c'] → ['a', 'c', 'b', 'c', 'd', 'e']
-  // retain: 2 → ['a', 'c', 'b', 'c', 'd', 'e']
-  // delete: 1 → ['a', 'c', 'b', 'd', 'e']
 };
 
 export const sender = {
