@@ -25,12 +25,11 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 import { CONFIG } from "./utils/config";
 import { ApiClient } from "./utils/api-client";
-import { createYDoc, logTodoListRegularly, todoListStore } from "./yjs-util";
+import { createYDoc, logTodoListRegularly } from "./yjs-util";
 import { showToast } from "./utils/toast";
-import { generateUUID } from "./utils/uuid";
 import { clientOrigin } from "./utils/client";
 import { receiver } from "./yjs-dom/receiver";
-import { onCompleteCheckboxClick } from "./yjs-dom/handler";
+import { handlers } from "./yjs-dom/handler";
 import { domUtil } from "./yjs-dom/dom-util";
 import { loadDoms } from "./yjs-dom/dom-store";
 
@@ -99,7 +98,10 @@ const main = async () => {
 
             if (item) {
               itemDoms.push(
-                domUtil.createTodoItemDom(item, onCompleteCheckboxClick)
+                domUtil.createTodoItemDom(
+                  item,
+                  handlers.onCompleteCheckboxClick
+                )
               );
             }
           }
@@ -116,38 +118,20 @@ const main = async () => {
 
   todoListStore.provider.on("synced", () => {
     receiver.clearAndReceiveAllItems({
-      onCompleteCheckboxClick,
+      onCompleteCheckboxClick: handlers.onCompleteCheckboxClick,
     });
     showToast("synced");
     startObserve();
   });
 
   logTodoListRegularly();
-};
 
-const addArrayItemButton = document.querySelector("#addArrayItemButton")!;
-const newArrayItemInput =
-  document.querySelector<HTMLInputElement>("#newArrayItemInput")!;
+  const { addArrayItemButton, newArrayItemInput } = DomStore;
 
-addArrayItemButton.addEventListener("click", async () => {
-  const item = newArrayItemInput.value;
-  const uuid = generateUUID();
-  if (!todoListStore) return;
-
-  todoListStore.doc.transact(() => {
-    if (!todoListStore) return;
-
-    todoListStore.itemMap.set(uuid, {
-      id: uuid,
-      title: item,
-      completed: false,
-    });
-
-    // トランザクションの中で重い処理を行うと、どうなるか検証していた。ちゃんと同時に反映されていた。
-    // heavyProcess();
-
-    todoListStore.order.push([uuid]);
+  addArrayItemButton.addEventListener("click", async (e) => {
+    const item = newArrayItemInput.value;
+    handlers.onAddItemClick(e, item);
   });
-});
+};
 
 main();
