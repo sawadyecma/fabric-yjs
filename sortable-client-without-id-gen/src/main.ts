@@ -29,13 +29,13 @@ import { CONFIG } from "./utils/config";
 import { ApiClient } from "./utils/api-client";
 import { createYDoc, logTodoListRegularly } from "./yjs-util";
 import { showToast } from "./utils/toast";
-import { clientOrigin } from "./utils/client";
 import { receiver } from "./yjs-dom/receiver";
 import { handlers, itemActionHandlers } from "./yjs-dom/handler";
 import { domUtil } from "./yjs-dom/dom-util";
 import { loadDoms } from "./yjs-dom/dom-store";
 import { loadDebuger } from "./yjs-dom/debugger";
 import { insertAt } from "./utils/array";
+import { isOriginOperation, isSameClient } from "./yjs-dom/origin";
 
 const connectWithDoc = async (docId: string) => {
   const apiClient = new ApiClient(CONFIG.SERVER_URL);
@@ -73,15 +73,18 @@ const main = async () => {
 
   const startObserve = () => {
     todoListStore.itemMap.observe((event) => {
+      const origin = event.transaction.origin;
+
+      if (!isOriginOperation(origin)) throw Error("origin must be specified");
+
       event.keysChanged.forEach((key) => {
         const item = todoListStore.itemMap.get(key);
         if (!item) return;
-        if (event.transaction.origin === clientOrigin) {
-          // showToast(
-          //   `updated item: ${key} but origin is here. so skipped dom update`
-          // );
+
+        if (isSameClient(origin)) {
           return;
         }
+
         receiver.receiveUpdatedItem(key, item);
       });
     });
@@ -90,6 +93,9 @@ const main = async () => {
 
     todoListStore.order.observe((event) => {
       let index = 0;
+      const origin = event.transaction.origin;
+
+      if (!isOriginOperation(origin)) throw Error("origin must be specified");
 
       console.log("event.delta", event.delta);
       event.delta.forEach((delta) => {
@@ -118,22 +124,13 @@ const main = async () => {
         } else if (delta.retain) {
           index += delta.retain;
         } else if (delta.delete) {
-          if (delta.delete === 1) {
-            const deletedId = previousIds[index];
-            showToast(
-              `delete item: delta.delete: ${delta.delete}, index: ${index}, deletedId: ${deletedId}`
-            );
-            receiver.singleDeleteItem(deletedId);
-            previousIds = previousIds.filter((v) => v !== deletedId);
-          } else {
-            const deletedIds = previousIds.slice(index, index + delta.delete);
-            const deletedSet = new Set(deletedIds);
-            showToast(`delete items: ${deletedIds}`);
-            deletedSet.forEach((id) => {
-              receiver.singleDeleteItem(id);
-            });
-            previousIds = previousIds.filter((v) => !deletedSet.has(v));
-          }
+          const deletedIds = previousIds.slice(index, index + delta.delete);
+          const deletedSet = new Set(deletedIds);
+          showToast(`delete items: ${deletedIds}`);
+          deletedSet.forEach((id) => {
+            receiver.singleDeleteItem(id);
+          });
+          previousIds = previousIds.filter((v) => !deletedSet.has(v));
         }
       });
       previousIds = todoListStore.order.toArray();

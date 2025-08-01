@@ -1,5 +1,5 @@
-import { clientOrigin } from "../utils/client";
 import { todoListStore, type TodoItem } from "../yjs-util";
+import { ORIGIN_OPERATIONS } from "./origin";
 
 const updateItemCompleted = (id: string, completed: boolean) => {
   if (!todoListStore) return;
@@ -17,7 +17,7 @@ const updateItemCompleted = (id: string, completed: boolean) => {
       ...item,
       completed,
     });
-  }, clientOrigin);
+  }, ORIGIN_OPERATIONS.update);
 };
 
 const addItem = (item: TodoItem) => {
@@ -32,7 +32,7 @@ const addItem = (item: TodoItem) => {
     // heavyProcess();
 
     store.order.push([item.id]);
-  });
+  }, ORIGIN_OPERATIONS.add);
 };
 
 const deleteItem = (id: string) => {
@@ -44,7 +44,7 @@ const deleteItem = (id: string) => {
 
     store.itemMap.delete(id);
     store.order.delete(store.order.toArray().indexOf(id));
-  });
+  }, ORIGIN_OPERATIONS.delete);
 };
 
 const sendForward = (id: string) => {
@@ -56,13 +56,10 @@ const sendForward = (id: string) => {
   const item = store.itemMap.get(id);
   if (!item) return;
 
-  todoListStore.doc.transact(
-    () => {
-      store.order.delete(index);
-      store.order.insert(index - 1, [item.id]);
-    }
-    // TODO
-  );
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(index - 1, [item.id]);
+  }, ORIGIN_OPERATIONS.moveForward);
 };
 
 const sendBackward = (id: string) => {
@@ -74,13 +71,10 @@ const sendBackward = (id: string) => {
   const item = store.itemMap.get(id);
   if (!item) return;
 
-  todoListStore.doc.transact(
-    () => {
-      store.order.delete(index);
-      store.order.insert(index + 1, [item.id]);
-    }
-    // TODO
-  );
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(index + 1, [item.id]);
+  }, ORIGIN_OPERATIONS.moveBackward);
 };
 
 const sendFront = (id: string) => {
@@ -92,13 +86,10 @@ const sendFront = (id: string) => {
   const item = store.itemMap.get(id);
   if (!item) return;
 
-  todoListStore.doc.transact(
-    () => {
-      store.order.delete(index);
-      store.order.insert(0, [item.id]);
-    }
-    // TODO
-  );
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(0, [item.id]);
+  }, ORIGIN_OPERATIONS.moveBackward);
 };
 
 const sendBack = (id: string) => {
@@ -110,13 +101,10 @@ const sendBack = (id: string) => {
   const item = store.itemMap.get(id);
   if (!item) return;
 
-  todoListStore.doc.transact(
-    () => {
-      store.order.delete(index);
-      store.order.insert(store.order.length, [item.id]);
-    }
-    // TODO
-  );
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(store.order.length, [item.id]);
+  }, ORIGIN_OPERATIONS.moveBackward);
 };
 
 const sendBackward10 = (id: string) => {
@@ -131,13 +119,10 @@ const sendBackward10 = (id: string) => {
   const newIndex =
     index + 10 <= store.order.length ? index + 10 : store.order.length - 1;
 
-  todoListStore.doc.transact(
-    () => {
-      store.order.delete(index);
-      store.order.insert(newIndex, [item.id]);
-    }
-    // TODO
-  );
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(newIndex, [item.id]);
+  }, ORIGIN_OPERATIONS.moveBackward);
 };
 
 export const sender = {
