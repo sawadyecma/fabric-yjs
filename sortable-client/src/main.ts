@@ -3,6 +3,7 @@ import "./main.css";
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <h2>Yjs Sortanble Client</h2>
+    <button id="addManyObjectsButton">Add Many Objects</button>
     <hr/>
     <table id="todo-list">
       <thead>
@@ -104,33 +105,30 @@ const main = async () => {
 
   const { todoListStore, provider } = await connectWithDoc(docId);
 
-  logTodoList();
-
   const startObserve = () => {
     todoListStore.order.observe((event) => {
-      logTodoList();
-
       event.delta.forEach((delta) => {
         let index = 0;
         if (delta.insert) {
           if (!Array.isArray(delta.insert)) {
-            console.log(`delta.insert(${delta.insert}) is not array`);
+            // console.log(`delta.insert(${delta.insert}) is not array`);
             return;
           }
 
           const inserts: string[] = delta.insert;
+          const itemDoms: HTMLElement[] = [];
           for (const insert of inserts) {
             const item = todoListStore.itemMap.get(insert);
             if (item) {
-              showToast(`inserted item: ${item.title}`);
-              tBodyDom.appendChild(createTodoItemDom(item));
+              // showToast(`inserted item: ${item.title}`);
+              itemDoms.push(createTodoItemDom(item));
             }
           }
+          tBodyDom.append(...itemDoms);
         } else if (delta.retain) {
           index += delta.retain;
         } else {
           console.log("delta is neither insert nor retain");
-          debugger;
         }
       });
     });
@@ -141,11 +139,30 @@ const main = async () => {
     showToast("synced");
     startObserve();
   });
+
+  setInterval(() => {
+    logTodoList();
+  }, 1000);
 };
 
 const addArrayItemButton = document.querySelector("#addArrayItemButton")!;
 const newArrayItemInput =
   document.querySelector<HTMLInputElement>("#newArrayItemInput")!;
+
+const addManyObjects = () => {
+  if (!todoListStore) return;
+  const count = 100;
+
+  for (let i = todoListStore.order.length; i < count; i++) {
+    const uuid = generateUUID();
+    todoListStore.itemMap.set(uuid, {
+      id: uuid,
+      title: `item ${i}`,
+      completed: false,
+    });
+    todoListStore.order.push([uuid]);
+  }
+};
 
 addArrayItemButton.addEventListener("click", () => {
   const item = newArrayItemInput.value;
@@ -157,6 +174,11 @@ addArrayItemButton.addEventListener("click", () => {
     completed: false,
   });
   todoListStore.order.push([uuid]);
+});
+
+const addManyObjectsButton = document.querySelector("#addManyObjectsButton")!;
+addManyObjectsButton.addEventListener("click", () => {
+  addManyObjects();
 });
 
 main();
