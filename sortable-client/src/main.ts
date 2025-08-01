@@ -25,15 +25,14 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 import { CONFIG } from "./utils/config";
 import { ApiClient } from "./utils/api-client";
-import {
-  createYDoc,
-  logTodoListRegularly,
-  todoListStore,
-  type TodoItem,
-} from "./yjs-util";
+import { createYDoc, logTodoListRegularly, todoListStore } from "./yjs-util";
 import { showToast } from "./utils/toast";
 import { generateUUID } from "./utils/uuid";
 import { clientOrigin } from "./utils/client";
+import { receiver } from "./yjs-dom/receiver";
+import { onCompleteCheckboxClick } from "./yjs-dom/handler";
+import { domUtil } from "./yjs-dom/dom-util";
+import { loadDoms } from "./yjs-dom/dom-store";
 
 const connectWithDoc = async (docId: string) => {
   const apiClient = new ApiClient(CONFIG.SERVER_URL);
@@ -54,83 +53,9 @@ const connectWithDoc = async (docId: string) => {
   return store;
 };
 
-const tBodyDom =
-  document.querySelector<HTMLTableSectionElement>("#todo-list tbody")!;
-
-const onCompleteCheckboxClick = (e: PointerEvent, id: string) => {
-  const target = e.target as HTMLInputElement;
-  const completed = target.checked;
-  updateItemCompleted(id, completed);
-};
-
-const updateItemCompleted = (id: string, completed: boolean) => {
-  if (!todoListStore) return;
-  const item = todoListStore.itemMap.get(id);
-  if (!item) {
-    throw Error("item is not found");
-  }
-
-  todoListStore.doc.transact(() => {
-    if (!todoListStore) return;
-
-    todoListStore.itemMap.set(id, {
-      ...item,
-      completed,
-    });
-  }, clientOrigin);
-};
-
-const createCheckboxDom = (completed: boolean, id: string) => {
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.checked = completed;
-  checkbox.addEventListener("click", (e) => {
-    onCompleteCheckboxClick(e, id);
-  });
-  return checkbox;
-};
-
-const createDeleteButtonDom = () => {
-  const button = document.createElement("button");
-  button.textContent = "Delete";
-  return button;
-};
-
-const createTodoItemDom = (item: TodoItem) => {
-  const tr = document.createElement("tr");
-  tr.dataset.id = item.id;
-  const titleTd = document.createElement("td");
-  const checkTd = document.createElement("td");
-  const actionTd = document.createElement("td");
-  titleTd.textContent = item.title;
-  checkTd.appendChild(createCheckboxDom(item.completed, item.id));
-  actionTd.appendChild(createDeleteButtonDom());
-
-  tr.append(titleTd, checkTd, actionTd);
-  return tr;
-};
-
-const renderTodoList = () => {
-  if (!todoListStore) return;
-  const ids = todoListStore.order.toArray();
-  for (const id of ids) {
-    const item = todoListStore.itemMap.get(id);
-    if (item) {
-      tBodyDom.appendChild(createTodoItemDom(item));
-    }
-  }
-};
-
-const updateItemDom = (id: string, item: TodoItem) => {
-  const tr = tBodyDom.querySelector(`tr[data-id="${item.id}"]`);
-  if (!tr) return;
-  const checkbox = tr.querySelector(
-    "input[type='checkbox']"
-  ) as HTMLInputElement;
-  checkbox.checked = item.completed;
-};
-
 const main = async () => {
+  const DomStore = loadDoms();
+
   const queryString = window.location.search;
   const params = new URLSearchParams(queryString);
   const docId = params.get("docId");
@@ -153,7 +78,7 @@ const main = async () => {
           );
           return;
         }
-        updateItemDom(key, item);
+        receiver.receiveUpdatedItem(key, item);
       });
     });
 
@@ -173,10 +98,13 @@ const main = async () => {
             showToast(`inserted item: ${insert}`);
 
             if (item) {
-              itemDoms.push(createTodoItemDom(item));
+              itemDoms.push(
+                domUtil.createTodoItemDom(item, onCompleteCheckboxClick)
+              );
             }
           }
-          tBodyDom.append(...itemDoms);
+
+          DomStore.tBodyDom.append(...itemDoms);
         } else if (delta.retain) {
           index += delta.retain;
         } else {
@@ -187,7 +115,9 @@ const main = async () => {
   };
 
   todoListStore.provider.on("synced", () => {
-    renderTodoList();
+    receiver.clearAndReceiveAllItems({
+      onCompleteCheckboxClick,
+    });
     showToast("synced");
     startObserve();
   });
@@ -198,21 +128,6 @@ const main = async () => {
 const addArrayItemButton = document.querySelector("#addArrayItemButton")!;
 const newArrayItemInput =
   document.querySelector<HTMLInputElement>("#newArrayItemInput")!;
-
-const addManyObjects = () => {
-  if (!todoListStore) return;
-  const count = 100;
-
-  for (let i = todoListStore.order.length; i < count; i++) {
-    const uuid = generateUUID();
-    todoListStore.itemMap.set(uuid, {
-      id: uuid,
-      title: `item ${i}`,
-      completed: false,
-    });
-    todoListStore.order.push([uuid]);
-  }
-};
 
 addArrayItemButton.addEventListener("click", async () => {
   const item = newArrayItemInput.value;
@@ -233,11 +148,6 @@ addArrayItemButton.addEventListener("click", async () => {
 
     todoListStore.order.push([uuid]);
   });
-});
-
-const addManyObjectsButton = document.querySelector("#addManyObjectsButton")!;
-addManyObjectsButton.addEventListener("click", () => {
-  addManyObjects();
 });
 
 main();
