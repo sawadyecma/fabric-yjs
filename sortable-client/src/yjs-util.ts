@@ -8,11 +8,6 @@ export type TodoItem = {
   completed: boolean;
 };
 
-type TodoList = TodoItem[];
-type TodoListMap = {
-  [key: string]: TodoItem;
-};
-
 export let todoListStore: {
   order: Y.Array<string>;
   itemMap: Y.Map<TodoItem>;
@@ -53,7 +48,7 @@ export const logTodoList = () => {
   console.log({ order: todoListStore.order.toArray() });
 };
 
-export const logTodoListRegularly = (ms: number = 3000) => {
+export const logTodoListRegularly = (ms: number = 10000) => {
   setInterval(() => {
     logTodoList();
   }, ms);

@@ -93,7 +93,6 @@ const main = async () => {
 
       console.log("event.delta", event.delta);
       event.delta.forEach((delta) => {
-        console.log("delta", delta);
         if (delta.insert) {
           if (!Array.isArray(delta.insert)) {
             // console.log(`delta.insert(${delta.insert}) is not array`);
