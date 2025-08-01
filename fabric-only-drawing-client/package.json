@@ -1,5 +1,5 @@
 {
-  "name": "fabric-client",
+  "name": "fabric-only-drawing-client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
