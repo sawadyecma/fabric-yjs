@@ -9,12 +9,7 @@ import type {
 
 const createTodoItemDom = (
   item: TodoItem,
-  {
-    onCompleteCheckboxClick,
-    onSingleDeleteItemClick,
-    onSendForwardClick,
-    onSendBackwardClick,
-  }: ItemActionHandlers
+  itemActionHandlers: ItemActionHandlers
 ) => {
   const tr = document.createElement("tr");
   tr.dataset.id = item.id;
@@ -23,20 +18,24 @@ const createTodoItemDom = (
   const actionTd = document.createElement("td");
   titleTd.textContent = item.title + `(${item.id})`;
   checkTd.appendChild(
-    createCheckboxDom(item.completed, item.id, onCompleteCheckboxClick)
+    createCheckboxDom(
+      item.completed,
+      item.id,
+      itemActionHandlers.onCompleteCheckboxClick
+    )
   );
   actionTd.append(
     createDeleteButtonDom({
       id: item.id,
-      onSingleDeleteItemClick,
+      onSingleDeleteItemClick: itemActionHandlers.onSingleDeleteItemClick,
     }),
     createSendForwardButtonDom({
       id: item.id,
-      onSendForwardClick,
+      onSendForwardClick: itemActionHandlers.onSendForwardClick,
     }),
     createSendBackwardButtonDom({
       id: item.id,
-      onSendBackwardClick,
+      onSendBackwardClick: itemActionHandlers.onSendBackwardClick,
     })
   );
 
