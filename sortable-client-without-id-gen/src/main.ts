@@ -35,7 +35,7 @@ import { domUtil } from "./yjs-dom/dom-util";
 import { loadDoms } from "./yjs-dom/dom-store";
 import { loadDebuger } from "./yjs-dom/debugger";
 import { insertAt } from "./utils/array";
-import { isSameClient } from "./yjs-dom/origin";
+import { isSameOrigin } from "./yjs-dom/origin";
 
 const connectWithDoc = async (docId: string) => {
   const apiClient = new ApiClient(CONFIG.SERVER_URL);
@@ -81,9 +81,7 @@ const main = async () => {
         const item = todoListStore.itemMap.get(key);
         if (!item) return;
 
-        if (isSameClient(origin)) {
-          return;
-        }
+        if (isSameOrigin(origin)) return;
 
         receiver.receiveUpdatedItem(key, item);
       });

@@ -1,6 +1,6 @@
 import { generateUUID } from "../utils/uuid";
 import { todoListStore } from "../yjs-util";
-import { ORIGIN_OPERATIONS } from "./origin";
+import { clientOrigin } from "./origin";
 
 const addManyItems = () => {
   if (!todoListStore) return;
@@ -20,7 +20,7 @@ const addManyItems = () => {
       });
       store.order.push([uuid]);
     }
-  }, ORIGIN_OPERATIONS.add);
+  }, clientOrigin);
 };
 
 const deleteAllItems = () => {
@@ -29,7 +29,7 @@ const deleteAllItems = () => {
   store.doc.transact(() => {
     store.itemMap.clear();
     store.order.delete(0, store.order.length);
-  }, ORIGIN_OPERATIONS.delete);
+  }, clientOrigin);
 };
 
 const deleteCompletedItems = () => {
@@ -42,7 +42,7 @@ const deleteCompletedItems = () => {
         store.itemMap.delete(item.id);
       }
     });
-  }, ORIGIN_OPERATIONS.delete);
+  }, clientOrigin);
 };
 
 export const loadDebuger = () => {

@@ -1,5 +1,5 @@
 import { todoListStore, type TodoItem } from "../yjs-util";
-import { ORIGIN_OPERATIONS } from "./origin";
+import { clientOrigin } from "./origin";
 
 const updateItemCompleted = (id: string, completed: boolean) => {
   if (!todoListStore) return;
@@ -17,7 +17,7 @@ const updateItemCompleted = (id: string, completed: boolean) => {
       ...item,
       completed,
     });
-  }, ORIGIN_OPERATIONS.update);
+  }, clientOrigin);
 };
 
 const addItem = (item: TodoItem) => {
@@ -32,7 +32,7 @@ const addItem = (item: TodoItem) => {
     // heavyProcess();
 
     store.order.push([item.id]);
-  }, ORIGIN_OPERATIONS.add);
+  }, clientOrigin);
 };
 
 const deleteItem = (id: string) => {
@@ -44,7 +44,7 @@ const deleteItem = (id: string) => {
 
     store.itemMap.delete(id);
     store.order.delete(store.order.toArray().indexOf(id));
-  }, ORIGIN_OPERATIONS.delete);
+  }, clientOrigin);
 };
 
 const sendForward = (id: string) => {
@@ -59,7 +59,7 @@ const sendForward = (id: string) => {
   todoListStore.doc.transact(() => {
     store.order.delete(index);
     store.order.insert(index - 1, [item.id]);
-  }, ORIGIN_OPERATIONS.moveForward);
+  }, clientOrigin);
 };
 
 const sendBackward = (id: string) => {
@@ -74,7 +74,7 @@ const sendBackward = (id: string) => {
   todoListStore.doc.transact(() => {
     store.order.delete(index);
     store.order.insert(index + 1, [item.id]);
-  }, ORIGIN_OPERATIONS.moveBackward);
+  }, clientOrigin);
 };
 
 const sendFront = (id: string) => {
@@ -89,7 +89,7 @@ const sendFront = (id: string) => {
   todoListStore.doc.transact(() => {
     store.order.delete(index);
     store.order.insert(0, [item.id]);
-  }, ORIGIN_OPERATIONS.moveBackward);
+  }, clientOrigin);
 };
 
 const sendBack = (id: string) => {
@@ -104,7 +104,7 @@ const sendBack = (id: string) => {
   todoListStore.doc.transact(() => {
     store.order.delete(index);
     store.order.insert(store.order.length, [item.id]);
-  }, ORIGIN_OPERATIONS.moveBackward);
+  }, clientOrigin);
 };
 
 const sendBackward10 = (id: string) => {
@@ -122,7 +122,7 @@ const sendBackward10 = (id: string) => {
   todoListStore.doc.transact(() => {
     store.order.delete(index);
     store.order.insert(newIndex, [item.id]);
-  }, ORIGIN_OPERATIONS.moveBackward);
+  }, clientOrigin);
 };
 
 export const sender = {
