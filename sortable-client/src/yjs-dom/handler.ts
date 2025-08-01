@@ -4,6 +4,7 @@ import type {
   ItemActionHandlers,
   OnAddItemClick,
   OnCompleteCheckboxClick,
+  OnSendBackwardClick,
   OnSendForwardClick,
   OnSingleDeleteItemClick,
 } from "./type";
@@ -31,14 +32,18 @@ const onSendForwardClick: OnSendForwardClick = (_e, id) => {
   sender.sendForward(id);
 };
 
+const onSendBackwardClick: OnSendBackwardClick = (_e, id) => {
+  sender.sendBackward(id);
+};
+
 export const itemActionHandlers: ItemActionHandlers = {
   onCompleteCheckboxClick,
   onSingleDeleteItemClick,
   onSendForwardClick,
+  onSendBackwardClick,
 };
 
 export const handlers = {
-  onCompleteCheckboxClick,
   onAddItemClick,
-  onSingleDeleteItemClick,
+  itemActionHandlers,
 };

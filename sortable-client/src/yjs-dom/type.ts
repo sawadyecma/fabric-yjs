@@ -9,4 +9,5 @@ export type ItemActionHandlers = {
   onCompleteCheckboxClick: OnCompleteCheckboxClick;
   onSingleDeleteItemClick: OnSingleDeleteItemClick;
   onSendForwardClick: OnSendForwardClick;
+  onSendBackwardClick: OnSendBackwardClick;
 };
