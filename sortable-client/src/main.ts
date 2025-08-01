@@ -115,6 +115,7 @@ const main = async () => {
           }
 
           DomStore.tBodyDom.append(...itemDoms);
+          index += inserts.length;
         } else if (delta.retain) {
           index += delta.retain;
         } else if (delta.delete) {
