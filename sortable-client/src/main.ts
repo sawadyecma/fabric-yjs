@@ -127,11 +127,12 @@ const main = async () => {
             previousIds = previousIds.filter((v) => v !== deletedId);
           } else {
             const deletedIds = previousIds.slice(index, index + delta.delete);
+            const deletedSet = new Set(deletedIds);
             showToast(`delete items: ${deletedIds}`);
-            deletedIds.forEach((id) => {
+            deletedSet.forEach((id) => {
               receiver.singleDeleteItem(id);
-              previousIds = previousIds.filter((v) => v !== id);
             });
+            previousIds = previousIds.filter((v) => !deletedSet.has(v));
           }
         }
       });
