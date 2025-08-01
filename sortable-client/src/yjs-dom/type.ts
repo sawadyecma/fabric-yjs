@@ -11,4 +11,5 @@ export type ItemActionHandlers = {
   onSendForwardClick: OnSendForwardClick;
   onSendBackwardClick: OnSendBackwardClick;
   onSendFrontClick: OnSendFrontClick;
+  onSendBackClick: OnSendBackClick;
 };

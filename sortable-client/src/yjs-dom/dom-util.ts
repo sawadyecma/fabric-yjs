@@ -2,6 +2,7 @@ import type { TodoItem } from "../yjs-util";
 import type {
   ItemActionHandlers,
   OnCompleteCheckboxClick,
+  OnSendBackClick,
   OnSendBackwardClick,
   OnSendForwardClick,
   OnSendFrontClick,
@@ -46,6 +47,10 @@ const createTodoItemDom = (
     createSendBackwardButtonDom({
       id: item.id,
       onSendBackwardClick: itemActionHandlers.onSendBackwardClick,
+    }),
+    createSendBackButtonDom({
+      id: item.id,
+      onSendBackClick: itemActionHandlers.onSendBackClick,
     })
   );
 
@@ -123,6 +128,21 @@ const createSendFrontButtonDom = ({
   button.textContent = "↑↑↑";
   button.addEventListener("click", (e) => {
     onSendFrontClick(e, id);
+  });
+  return button;
+};
+
+const createSendBackButtonDom = ({
+  id,
+  onSendBackClick,
+}: {
+  id: string;
+  onSendBackClick: OnSendBackClick;
+}) => {
+  const button = document.createElement("button");
+  button.textContent = "↓↓↓↓";
+  button.addEventListener("click", (e) => {
+    onSendBackClick(e, id);
   });
   return button;
 };

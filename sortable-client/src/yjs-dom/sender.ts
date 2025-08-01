@@ -115,6 +115,27 @@ const sendFront = (id: string) => {
   });
 };
 
+const sendBack = (id: string) => {
+  if (!todoListStore) return;
+  const store = todoListStore;
+  const index = store.order.toArray().indexOf(id);
+  if (index === -1) return;
+  if (index === store.order.length - 1) return;
+  const item = store.itemMap.get(id);
+  if (!item) return;
+  const newItem = {
+    ...item,
+    id: generateUUID(),
+  };
+
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(store.order.length, [newItem.id]);
+    store.itemMap.set(newItem.id, newItem);
+    store.itemMap.delete(id);
+  });
+};
+
 export const sender = {
   updateItemCompleted,
   addItem,
@@ -122,4 +143,5 @@ export const sender = {
   sendForward,
   sendBackward,
   sendFront,
+  sendBack,
 };
