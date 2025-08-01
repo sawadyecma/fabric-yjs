@@ -1,5 +1,5 @@
 import * as Y from "yjs";
-import { createYjsProvider } from "@y-sweet/client";
+import { createYjsProvider, YSweetProvider } from "@y-sweet/client";
 import type { ClientToken } from "@y-sweet/sdk";
 
 export type TodoItem = {
@@ -16,6 +16,8 @@ type TodoListMap = {
 export let todoListStore: {
   order: Y.Array<string>;
   itemMap: Y.Map<TodoItem>;
+  provider: YSweetProvider;
+  doc: Y.Doc;
 } | null = null;
 
 export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
@@ -34,9 +36,11 @@ export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
   todoListStore = {
     itemMap,
     order,
+    provider,
+    doc,
   };
 
-  return { todoListStore, provider };
+  return todoListStore;
 };
 
 export const logTodoList = () => {
@@ -47,6 +51,12 @@ export const logTodoList = () => {
 
   console.log({ itemMap: mapToRecord(todoListStore.itemMap) });
   console.log({ order: todoListStore.order.toArray() });
+};
+
+export const logTodoListRegularly = (ms: number = 3000) => {
+  setInterval(() => {
+    logTodoList();
+  }, ms);
 };
 
 const mapToRecord = (map: Y.Map<TodoItem>) => {

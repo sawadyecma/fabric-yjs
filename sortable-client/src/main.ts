@@ -27,7 +27,7 @@ import { CONFIG } from "./utils/config";
 import { ApiClient } from "./utils/api-client";
 import {
   createYDoc,
-  logTodoList,
+  logTodoListRegularly,
   todoListStore,
   type TodoItem,
 } from "./yjs-util";
@@ -103,9 +103,19 @@ const main = async () => {
     return;
   }
 
-  const { todoListStore, provider } = await connectWithDoc(docId);
+  const todoListStore = await connectWithDoc(docId);
 
   const startObserve = () => {
+    todoListStore.itemMap.observe((event) => {
+      event.keysChanged.forEach((key) => {
+        showToast(`updated item: ${key}`);
+        const item = todoListStore.itemMap.get(key);
+        if (item) {
+          showToast(`updated item: ${item.title}`);
+        }
+      });
+    });
+
     todoListStore.order.observe((event) => {
       event.delta.forEach((delta) => {
         let index = 0;
@@ -119,8 +129,9 @@ const main = async () => {
           const itemDoms: HTMLElement[] = [];
           for (const insert of inserts) {
             const item = todoListStore.itemMap.get(insert);
+            showToast(`inserted item: ${insert}`);
+
             if (item) {
-              // showToast(`inserted item: ${item.title}`);
               itemDoms.push(createTodoItemDom(item));
             }
           }
@@ -134,15 +145,13 @@ const main = async () => {
     });
   };
 
-  provider.on("synced", () => {
+  todoListStore.provider.on("synced", () => {
     renderTodoList();
     showToast("synced");
     startObserve();
   });
 
-  setInterval(() => {
-    logTodoList();
-  }, 1000);
+  logTodoListRegularly();
 };
 
 const addArrayItemButton = document.querySelector("#addArrayItemButton")!;
@@ -164,16 +173,25 @@ const addManyObjects = () => {
   }
 };
 
-addArrayItemButton.addEventListener("click", () => {
+addArrayItemButton.addEventListener("click", async () => {
   const item = newArrayItemInput.value;
   const uuid = generateUUID();
   if (!todoListStore) return;
-  todoListStore.itemMap.set(uuid, {
-    id: uuid,
-    title: item,
-    completed: false,
+
+  todoListStore.doc.transact(() => {
+    if (!todoListStore) return;
+
+    todoListStore.itemMap.set(uuid, {
+      id: uuid,
+      title: item,
+      completed: false,
+    });
+
+    // トランザクションの中で重い処理を行うと、どうなるか検証していた。ちゃんと同時に反映されていた。
+    // heavyProcess();
+
+    todoListStore.order.push([uuid]);
   });
-  todoListStore.order.push([uuid]);
 });
 
 const addManyObjectsButton = document.querySelector("#addManyObjectsButton")!;
