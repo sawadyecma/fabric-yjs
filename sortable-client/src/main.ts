@@ -31,7 +31,7 @@ import { createYDoc, logTodoListRegularly } from "./yjs-util";
 import { showToast } from "./utils/toast";
 import { clientOrigin } from "./utils/client";
 import { receiver } from "./yjs-dom/receiver";
-import { handlers } from "./yjs-dom/handler";
+import { handlers, itemActionHandlers } from "./yjs-dom/handler";
 import { domUtil } from "./yjs-dom/dom-util";
 import { loadDoms } from "./yjs-dom/dom-store";
 import { loadDebuger } from "./yjs-dom/debugger";
@@ -106,10 +106,7 @@ const main = async () => {
 
             if (item) {
               itemDoms.push(
-                domUtil.createTodoItemDom(item, {
-                  onCompleteCheckboxClick: handlers.onCompleteCheckboxClick,
-                  onSingleDeleteItemClick: handlers.onSingleDeleteItemClick,
-                })
+                domUtil.createTodoItemDom(item, itemActionHandlers)
               );
             }
           }
@@ -142,10 +139,7 @@ const main = async () => {
   };
 
   todoListStore.provider.on("synced", () => {
-    receiver.clearAndReceiveAllItems({
-      onCompleteCheckboxClick: handlers.onCompleteCheckboxClick,
-      onSingleDeleteItemClick: handlers.onSingleDeleteItemClick,
-    });
+    receiver.clearAndReceiveAllItems(itemActionHandlers);
     showToast("synced");
     startObserve();
   });

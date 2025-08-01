@@ -1,8 +1,10 @@
 import { generateUUID } from "../utils/uuid";
 import { sender } from "./sender";
 import type {
+  ItemActionHandlers,
   OnAddItemClick,
   OnCompleteCheckboxClick,
+  OnSendForwardClick,
   OnSingleDeleteItemClick,
 } from "./type";
 
@@ -23,6 +25,16 @@ const onAddItemClick: OnAddItemClick = (_e, title) => {
 
 const onSingleDeleteItemClick: OnSingleDeleteItemClick = (_e, id) => {
   sender.deleteItem(id);
+};
+
+const onSendForwardClick: OnSendForwardClick = (_e, id) => {
+  sender.sendForward(id);
+};
+
+export const itemActionHandlers: ItemActionHandlers = {
+  onCompleteCheckboxClick,
+  onSingleDeleteItemClick,
+  onSendForwardClick,
 };
 
 export const handlers = {

@@ -47,8 +47,22 @@ const deleteItem = (id: string) => {
   });
 };
 
+const sendForward = (id: string) => {
+  if (!todoListStore) return;
+  const store = todoListStore;
+  const index = store.order.toArray().indexOf(id);
+  if (index === -1) return;
+  if (index === 0) return;
+
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(index - 1, [id]);
+  });
+};
+
 export const sender = {
   updateItemCompleted,
   addItem,
   deleteItem,
+  sendForward,
 };

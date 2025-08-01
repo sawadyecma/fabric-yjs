@@ -1,15 +1,18 @@
 import type { TodoItem } from "../yjs-util";
-import type { OnCompleteCheckboxClick, OnSingleDeleteItemClick } from "./type";
+import type {
+  ItemActionHandlers,
+  OnCompleteCheckboxClick,
+  OnSendForwardClick,
+  OnSingleDeleteItemClick,
+} from "./type";
 
 const createTodoItemDom = (
   item: TodoItem,
   {
     onCompleteCheckboxClick,
     onSingleDeleteItemClick,
-  }: {
-    onCompleteCheckboxClick: OnCompleteCheckboxClick;
-    onSingleDeleteItemClick: OnSingleDeleteItemClick;
-  }
+    onSendForwardClick,
+  }: ItemActionHandlers
 ) => {
   const tr = document.createElement("tr");
   tr.dataset.id = item.id;
@@ -20,10 +23,14 @@ const createTodoItemDom = (
   checkTd.appendChild(
     createCheckboxDom(item.completed, item.id, onCompleteCheckboxClick)
   );
-  actionTd.appendChild(
+  actionTd.append(
     createDeleteButtonDom({
       id: item.id,
       onSingleDeleteItemClick,
+    }),
+    createSendForwardButtonDom({
+      id: item.id,
+      onSendForwardClick,
     })
   );
 
@@ -56,6 +63,21 @@ const createDeleteButtonDom = ({
   button.textContent = "Delete";
   button.addEventListener("click", (e) => {
     onSingleDeleteItemClick(e, id);
+  });
+  return button;
+};
+
+const createSendForwardButtonDom = ({
+  id,
+  onSendForwardClick,
+}: {
+  id: string;
+  onSendForwardClick: OnSendForwardClick;
+}) => {
+  const button = document.createElement("button");
+  button.textContent = "↑1";
+  button.addEventListener("click", (e) => {
+    onSendForwardClick(e, id);
   });
   return button;
 };
