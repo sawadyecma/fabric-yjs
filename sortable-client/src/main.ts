@@ -107,17 +107,12 @@ const main = async () => {
             if (!item) return;
 
             const tBodyDom = DomStore.tBodyDom;
-            const target = tBodyDom.children[index];
-            if (target) {
-              tBodyDom.insertBefore(
-                domUtil.createTodoItemDom(item, itemActionHandlers),
-                target
-              );
-            } else {
-              tBodyDom.append(
-                domUtil.createTodoItemDom(item, itemActionHandlers)
-              );
-            }
+            const target = tBodyDom.children[index] ?? null;
+            // nullなら末尾に追加される
+            tBodyDom.insertBefore(
+              domUtil.createTodoItemDom(item, itemActionHandlers),
+              target
+            );
             previousIds = insertAt(previousIds, index, insert);
             index += 1;
           }
