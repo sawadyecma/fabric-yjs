@@ -1,6 +1,10 @@
 import { generateUUID } from "../utils/uuid";
 import { sender } from "./sender";
-import type { OnAddItemClick, OnCompleteCheckboxClick } from "./type";
+import type {
+  OnAddItemClick,
+  OnCompleteCheckboxClick,
+  OnSingleDeleteItemClick,
+} from "./type";
 
 const onCompleteCheckboxClick: OnCompleteCheckboxClick = (e, id) => {
   const target = e.target as HTMLInputElement;
@@ -17,7 +21,12 @@ const onAddItemClick: OnAddItemClick = (_e, title) => {
   });
 };
 
+const onSingleDeleteItemClick: OnSingleDeleteItemClick = (_e, id) => {
+  sender.deleteItem(id);
+};
+
 export const handlers = {
   onCompleteCheckboxClick,
   onAddItemClick,
+  onSingleDeleteItemClick,
 };

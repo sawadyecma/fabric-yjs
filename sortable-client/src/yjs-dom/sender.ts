@@ -8,10 +8,12 @@ const updateItemCompleted = (id: string, completed: boolean) => {
     throw Error("item is not found");
   }
 
-  todoListStore.doc.transact(() => {
-    if (!todoListStore) return;
+  const store = todoListStore;
 
-    todoListStore.itemMap.set(id, {
+  todoListStore.doc.transact(() => {
+    if (!store) return;
+
+    store.itemMap.set(id, {
       ...item,
       completed,
     });
@@ -21,19 +23,32 @@ const updateItemCompleted = (id: string, completed: boolean) => {
 const addItem = (item: TodoItem) => {
   if (!todoListStore) return;
 
-  todoListStore.doc.transact(() => {
-    if (!todoListStore) return;
+  const store = todoListStore;
 
-    todoListStore.itemMap.set(item.id, item);
+  todoListStore.doc.transact(() => {
+    store.itemMap.set(item.id, item);
 
     // トランザクションの中で重い処理を行うと、どうなるか検証していた。ちゃんと同時に反映されていた。
     // heavyProcess();
 
-    todoListStore.order.push([item.id]);
+    store.order.push([item.id]);
+  });
+};
+
+const deleteItem = (id: string) => {
+  if (!todoListStore) return;
+  const store = todoListStore;
+
+  todoListStore.doc.transact(() => {
+    if (!store) return;
+
+    store.itemMap.delete(id);
+    store.order.delete(store.order.toArray().indexOf(id));
   });
 };
 
 export const sender = {
   updateItemCompleted,
   addItem,
+  deleteItem,
 };

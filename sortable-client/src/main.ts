@@ -72,18 +72,21 @@ const main = async () => {
         const item = todoListStore.itemMap.get(key);
         if (!item) return;
         if (event.transaction.origin === clientOrigin) {
-          showToast(
-            `updated item: ${key} but origin is here. so skipped dom update`
-          );
+          // showToast(
+          //   `updated item: ${key} but origin is here. so skipped dom update`
+          // );
           return;
         }
         receiver.receiveUpdatedItem(key, item);
       });
     });
 
+    let previousIds = todoListStore.order.toArray();
+
     todoListStore.order.observe((event) => {
+      let index = 0;
       event.delta.forEach((delta) => {
-        let index = 0;
+        console.log("delta", delta);
         if (delta.insert) {
           if (!Array.isArray(delta.insert)) {
             // console.log(`delta.insert(${delta.insert}) is not array`);
@@ -98,10 +101,10 @@ const main = async () => {
 
             if (item) {
               itemDoms.push(
-                domUtil.createTodoItemDom(
-                  item,
-                  handlers.onCompleteCheckboxClick
-                )
+                domUtil.createTodoItemDom(item, {
+                  onCompleteCheckboxClick: handlers.onCompleteCheckboxClick,
+                  onSingleDeleteItemClick: handlers.onSingleDeleteItemClick,
+                })
               );
             }
           }
@@ -109,16 +112,30 @@ const main = async () => {
           DomStore.tBodyDom.append(...itemDoms);
         } else if (delta.retain) {
           index += delta.retain;
-        } else {
-          console.log("delta is neither insert nor retain");
+        } else if (delta.delete) {
+          if (delta.delete === 1) {
+            const deletedId = previousIds[index];
+            showToast(
+              `delete item: delta.delete: ${delta.delete}, index: ${index}, deletedId: ${deletedId}`
+            );
+            receiver.singleDeleteItem(deletedId);
+          } else {
+            const deletedIds = previousIds.slice(index, index + delta.delete);
+            showToast(`delete items: ${deletedIds}`);
+            deletedIds.forEach((id) => {
+              receiver.singleDeleteItem(id);
+            });
+          }
         }
       });
+      previousIds = todoListStore.order.toArray();
     });
   };
 
   todoListStore.provider.on("synced", () => {
     receiver.clearAndReceiveAllItems({
       onCompleteCheckboxClick: handlers.onCompleteCheckboxClick,
+      onSingleDeleteItemClick: handlers.onSingleDeleteItemClick,
     });
     showToast("synced");
     startObserve();

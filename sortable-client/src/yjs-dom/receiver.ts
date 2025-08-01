@@ -1,7 +1,7 @@
 import { todoListStore, type TodoItem } from "../yjs-util";
 import { DomStore } from "./dom-store";
 import { domUtil } from "./dom-util";
-import type { OnCompleteCheckboxClick } from "./type";
+import type { OnCompleteCheckboxClick, OnSingleDeleteItemClick } from "./type";
 
 const receiveUpdatedItem = (id: string, item: TodoItem) => {
   if (!DomStore) return;
@@ -16,8 +16,10 @@ const receiveUpdatedItem = (id: string, item: TodoItem) => {
 
 const clearAndReceiveAllItems = ({
   onCompleteCheckboxClick,
+  onSingleDeleteItemClick,
 }: {
   onCompleteCheckboxClick: OnCompleteCheckboxClick;
+  onSingleDeleteItemClick: OnSingleDeleteItemClick;
 }) => {
   if (!todoListStore || !DomStore) return;
   const { tBodyDom } = DomStore;
@@ -27,13 +29,28 @@ const clearAndReceiveAllItems = ({
     const item = todoListStore.itemMap.get(id);
     if (item) {
       tBodyDom.appendChild(
-        domUtil.createTodoItemDom(item, onCompleteCheckboxClick)
+        domUtil.createTodoItemDom(item, {
+          onCompleteCheckboxClick,
+          onSingleDeleteItemClick,
+        })
       );
     }
   }
 };
 
+const singleDeleteItem = (id: string) => {
+  if (!DomStore) return;
+  const { tBodyDom } = DomStore;
+
+  if (!todoListStore) return;
+
+  const tr = tBodyDom.querySelector(`tr[data-id="${id}"]`);
+  if (!tr) return;
+  tr.remove();
+};
+
 export const receiver = {
   receiveUpdatedItem,
   clearAndReceiveAllItems,
+  singleDeleteItem,
 };
