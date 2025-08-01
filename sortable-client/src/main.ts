@@ -3,7 +3,9 @@ import "./main.css";
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <h2>Yjs Sortanble Client</h2>
-    <button id="addManyObjectsButton">Add Many Objects</button>
+    <button id="addManyItemsButton">Add Many Items</button>
+    <button id="deleteAllItems">Delete All Items</button>
+    <button id="deleteCompletedItems">Delete Completed Items</button>
     <hr/>
     <table id="todo-list">
       <thead>
@@ -32,6 +34,7 @@ import { receiver } from "./yjs-dom/receiver";
 import { handlers } from "./yjs-dom/handler";
 import { domUtil } from "./yjs-dom/dom-util";
 import { loadDoms } from "./yjs-dom/dom-store";
+import { loadDebuger } from "./yjs-dom/debugger";
 
 const connectWithDoc = async (docId: string) => {
   const apiClient = new ApiClient(CONFIG.SERVER_URL);
@@ -54,6 +57,7 @@ const connectWithDoc = async (docId: string) => {
 
 const main = async () => {
   const DomStore = loadDoms();
+  loadDebuger();
 
   const queryString = window.location.search;
   const params = new URLSearchParams(queryString);
@@ -95,9 +99,10 @@ const main = async () => {
 
           const inserts: string[] = delta.insert;
           const itemDoms: HTMLElement[] = [];
+          showToast(`inserted item: ${inserts}`);
+
           for (const insert of inserts) {
             const item = todoListStore.itemMap.get(insert);
-            showToast(`inserted item: ${insert}`);
 
             if (item) {
               itemDoms.push(
@@ -119,11 +124,13 @@ const main = async () => {
               `delete item: delta.delete: ${delta.delete}, index: ${index}, deletedId: ${deletedId}`
             );
             receiver.singleDeleteItem(deletedId);
+            previousIds = previousIds.filter((v) => v !== deletedId);
           } else {
             const deletedIds = previousIds.slice(index, index + delta.delete);
             showToast(`delete items: ${deletedIds}`);
             deletedIds.forEach((id) => {
               receiver.singleDeleteItem(id);
+              previousIds = previousIds.filter((v) => v !== id);
             });
           }
         }
