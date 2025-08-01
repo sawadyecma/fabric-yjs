@@ -14,14 +14,9 @@ const updateItemCompleted = (id: string, completed: boolean) => {
   const newItem = {
     ...item,
     completed,
-    id: generateUUID(),
   };
 
   todoListStore.doc.transact(() => {
-    const index = store.order.toArray().indexOf(id);
-    store.order.delete(index);
-    store.order.insert(index, [newItem.id]);
-    store.itemMap.delete(id);
     store.itemMap.set(newItem.id, newItem);
   }, clientOrigin);
 };
@@ -38,7 +33,7 @@ const addItem = (item: TodoItem) => {
     // heavyProcess();
 
     store.order.push([item.id]);
-  });
+  }, clientOrigin);
 };
 
 const deleteItem = (id: string) => {
@@ -48,7 +43,7 @@ const deleteItem = (id: string) => {
   todoListStore.doc.transact(() => {
     store.itemMap.delete(id);
     store.order.delete(store.order.toArray().indexOf(id));
-  });
+  }, clientOrigin);
 };
 
 const sendForward = (id: string) => {
@@ -71,7 +66,7 @@ const sendForward = (id: string) => {
     store.order.insert(index - 1, [newItem.id]);
     store.itemMap.set(newItem.id, newItem);
     store.itemMap.delete(id);
-  });
+  }, clientOrigin);
 };
 
 const sendBackward = (id: string) => {
@@ -93,7 +88,7 @@ const sendBackward = (id: string) => {
     store.order.insert(index + 1, [newItem.id]);
     store.itemMap.set(newItem.id, newItem);
     store.itemMap.delete(id);
-  });
+  }, clientOrigin);
 };
 
 const sendFront = (id: string) => {
@@ -115,7 +110,7 @@ const sendFront = (id: string) => {
     store.order.insert(0, [newItem.id]);
     store.itemMap.set(newItem.id, newItem);
     store.itemMap.delete(id);
-  });
+  }, clientOrigin);
 };
 
 const sendBack = (id: string) => {
@@ -136,7 +131,7 @@ const sendBack = (id: string) => {
     store.order.insert(store.order.length, [newItem.id]);
     store.itemMap.set(newItem.id, newItem);
     store.itemMap.delete(id);
-  });
+  }, clientOrigin);
 };
 
 const sendBackward10 = (id: string) => {
@@ -161,7 +156,7 @@ const sendBackward10 = (id: string) => {
     store.order.insert(newIndex, [newItem.id]);
     store.itemMap.set(newItem.id, newItem);
     store.itemMap.delete(id);
-  });
+  }, clientOrigin);
 };
 
 const undo = () => {

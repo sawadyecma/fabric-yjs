@@ -1,6 +1,7 @@
 import * as Y from "yjs";
 import { createYjsProvider, YSweetProvider } from "@y-sweet/client";
 import type { ClientToken } from "@y-sweet/sdk";
+import { clientOrigin } from "./utils/client";
 
 export type TodoItem = {
   id: string;
@@ -29,7 +30,10 @@ export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
   const itemMap = doc.getMap<TodoItem>("itemMap");
   const order = doc.getArray<string>("order");
 
-  const undoManager = new Y.UndoManager(doc);
+  const undoManager = new Y.UndoManager(doc, {
+    // これがないとclientOriginしているtransactionはundoできない
+    trackedOrigins: new Set([clientOrigin]),
+  });
 
   todoListStore = {
     itemMap,
