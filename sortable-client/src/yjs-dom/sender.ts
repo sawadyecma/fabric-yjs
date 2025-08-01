@@ -136,6 +136,31 @@ const sendBack = (id: string) => {
   });
 };
 
+const sendBackward10 = (id: string) => {
+  if (!todoListStore) return;
+  const store = todoListStore;
+  const index = store.order.toArray().indexOf(id);
+  if (index === -1) return;
+  if (index === store.order.length - 1) return;
+  const item = store.itemMap.get(id);
+  if (!item) return;
+
+  const newItem = {
+    ...item,
+    id: generateUUID(),
+  };
+
+  const newIndex =
+    index + 10 <= store.order.length ? index + 10 : store.order.length - 1;
+
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(newIndex, [newItem.id]);
+    store.itemMap.set(newItem.id, newItem);
+    store.itemMap.delete(id);
+  });
+};
+
 export const sender = {
   updateItemCompleted,
   addItem,
@@ -144,4 +169,5 @@ export const sender = {
   sendBackward,
   sendFront,
   sendBack,
+  sendBackward10,
 };

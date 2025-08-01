@@ -46,6 +46,10 @@ const onSendBackClick: OnSendBackClick = (_e, id) => {
   sender.sendBack(id);
 };
 
+const onSendBackward10Click: OnSendBackwardClick = (_e, id) => {
+  sender.sendBackward10(id);
+};
+
 export const itemActionHandlers: ItemActionHandlers = {
   onCompleteCheckboxClick,
   onSingleDeleteItemClick,
@@ -53,6 +57,7 @@ export const itemActionHandlers: ItemActionHandlers = {
   onSendBackwardClick,
   onSendFrontClick,
   onSendBackClick,
+  onSendBackward10Click,
 };
 
 export const handlers = {

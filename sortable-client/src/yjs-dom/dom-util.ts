@@ -51,6 +51,10 @@ const createTodoItemDom = (
     createSendBackButtonDom({
       id: item.id,
       onSendBackClick: itemActionHandlers.onSendBackClick,
+    }),
+    createSendBackward10ButtonDom({
+      id: item.id,
+      onSendBackward10Click: itemActionHandlers.onSendBackward10Click,
     })
   );
 
@@ -143,6 +147,21 @@ const createSendBackButtonDom = ({
   button.textContent = "↓↓↓↓";
   button.addEventListener("click", (e) => {
     onSendBackClick(e, id);
+  });
+  return button;
+};
+
+const createSendBackward10ButtonDom = ({
+  id,
+  onSendBackward10Click,
+}: {
+  id: string;
+  onSendBackward10Click: OnSendBackwardClick;
+}) => {
+  const button = document.createElement("button");
+  button.textContent = "↓10";
+  button.addEventListener("click", (e) => {
+    onSendBackward10Click(e, id);
   });
   return button;
 };
