@@ -6,6 +6,8 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <button id="addManyItemsButton">Add Many Items</button>
     <button id="deleteAllItems">Delete All Items</button>
     <button id="deleteCompletedItems">Delete Completed Items</button>
+    <button id="undoButton">Undo</button>
+    <button id="redoButton">Redo</button>
     <hr/>
     <table id="todo-list">
       <thead>
@@ -88,6 +90,10 @@ const main = async () => {
 
     let previousIds = todoListStore.order.toArray();
 
+    todoListStore.itemMap.observeDeep((event) => {
+      console.log("observeDeep event", event);
+    });
+
     todoListStore.order.observe((event) => {
       let index = 0;
 
@@ -154,6 +160,10 @@ const main = async () => {
     const item = newArrayItemInput.value;
     handlers.onAddItemClick(e, item);
   });
+
+  const { undoButton, redoButton } = DomStore;
+  undoButton.addEventListener("click", handlers.onUndoClick);
+  redoButton.addEventListener("click", handlers.onRedoClick);
 };
 
 main();

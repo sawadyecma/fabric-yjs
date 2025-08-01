@@ -14,3 +14,5 @@ export type ItemActionHandlers = {
   onSendBackClick: OnSendBackClick;
   onSendBackward10Click: OnSendBackwardClick;
 };
+export type OnUndoClick = (e: Event) => void;
+export type OnRedoClick = (e: Event) => void;

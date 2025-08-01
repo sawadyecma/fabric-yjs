@@ -11,11 +11,18 @@ const updateItemCompleted = (id: string, completed: boolean) => {
 
   const store = todoListStore;
 
+  const newItem = {
+    ...item,
+    completed,
+    id: generateUUID(),
+  };
+
   todoListStore.doc.transact(() => {
-    store.itemMap.set(id, {
-      ...item,
-      completed,
-    });
+    const index = store.order.toArray().indexOf(id);
+    store.order.delete(index);
+    store.order.insert(index, [newItem.id]);
+    store.itemMap.delete(id);
+    store.itemMap.set(newItem.id, newItem);
   }, clientOrigin);
 };
 
@@ -157,6 +164,18 @@ const sendBackward10 = (id: string) => {
   });
 };
 
+const undo = () => {
+  if (!todoListStore) return;
+  const store = todoListStore;
+  store.undoManager.undo();
+};
+
+const redo = () => {
+  if (!todoListStore) return;
+  const store = todoListStore;
+  store.undoManager.redo();
+};
+
 export const sender = {
   updateItemCompleted,
   addItem,
@@ -166,4 +185,6 @@ export const sender = {
   sendFront,
   sendBack,
   sendBackward10,
+  undo,
+  redo,
 };

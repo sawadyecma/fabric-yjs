@@ -13,6 +13,7 @@ export let todoListStore: {
   itemMap: Y.Map<TodoItem>;
   provider: YSweetProvider;
   doc: Y.Doc;
+  undoManager: Y.UndoManager;
 } | null = null;
 
 export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
@@ -28,11 +29,14 @@ export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
   const itemMap = doc.getMap<TodoItem>("itemMap");
   const order = doc.getArray<string>("order");
 
+  const undoManager = new Y.UndoManager(doc);
+
   todoListStore = {
     itemMap,
     order,
     provider,
     doc,
+    undoManager,
   };
 
   return todoListStore;
