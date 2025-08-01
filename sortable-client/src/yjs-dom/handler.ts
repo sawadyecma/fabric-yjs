@@ -1,4 +1,4 @@
-import { sender } from "./send";
+import { sender } from "./sender";
 import type { OnCompleteCheckboxClick } from "./type";
 
 export const onCompleteCheckboxClick: OnCompleteCheckboxClick = (e, id) => {
