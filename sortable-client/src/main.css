@@ -1,7 +1,14 @@
-#shared-array {
+#todo-list {
   border-collapse: collapse;
+  border-spacing: 10px;
 }
 
-#shared-array tbody tr {
+#todo-list tbody tr {
   border: solid #ccc 1px;
+}
+
+#todo-list tbody tr td span {
+  font-size: 0.5rem;
+  display: block;
+  color: #999;
 }

@@ -10,4 +10,5 @@ export type ItemActionHandlers = {
   onSingleDeleteItemClick: OnSingleDeleteItemClick;
   onSendForwardClick: OnSendForwardClick;
   onSendBackwardClick: OnSendBackwardClick;
+  onSendFrontClick: OnSendFrontClick;
 };

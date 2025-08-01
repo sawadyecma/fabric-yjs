@@ -93,10 +93,33 @@ const sendBackward = (id: string) => {
   });
 };
 
+const sendFront = (id: string) => {
+  if (!todoListStore) return;
+  const store = todoListStore;
+  const index = store.order.toArray().indexOf(id);
+  if (index === -1) return;
+  if (index === 0) return;
+  const item = store.itemMap.get(id);
+  if (!item) return;
+
+  const newItem = {
+    ...item,
+    id: generateUUID(),
+  };
+
+  todoListStore.doc.transact(() => {
+    store.order.delete(index);
+    store.order.insert(0, [newItem.id]);
+    store.itemMap.set(newItem.id, newItem);
+    store.itemMap.delete(id);
+  });
+};
+
 export const sender = {
   updateItemCompleted,
   addItem,
   deleteItem,
   sendForward,
   sendBackward,
+  sendFront,
 };

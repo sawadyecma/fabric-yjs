@@ -4,6 +4,7 @@ import type {
   OnCompleteCheckboxClick,
   OnSendBackwardClick,
   OnSendForwardClick,
+  OnSendFrontClick,
   OnSingleDeleteItemClick,
 } from "./type";
 
@@ -16,7 +17,12 @@ const createTodoItemDom = (
   const titleTd = document.createElement("td");
   const checkTd = document.createElement("td");
   const actionTd = document.createElement("td");
-  titleTd.textContent = item.title + `(${item.id})`;
+  titleTd.textContent = item.title;
+
+  const idSpan = document.createElement("span");
+  idSpan.textContent = item.id;
+
+  titleTd.append(idSpan);
   checkTd.appendChild(
     createCheckboxDom(
       item.completed,
@@ -28,6 +34,10 @@ const createTodoItemDom = (
     createDeleteButtonDom({
       id: item.id,
       onSingleDeleteItemClick: itemActionHandlers.onSingleDeleteItemClick,
+    }),
+    createSendFrontButtonDom({
+      id: item.id,
+      onSendFrontClick: itemActionHandlers.onSendFrontClick,
     }),
     createSendForwardButtonDom({
       id: item.id,
@@ -98,6 +108,21 @@ const createSendBackwardButtonDom = ({
   button.textContent = "↓1";
   button.addEventListener("click", (e) => {
     onSendBackwardClick(e, id);
+  });
+  return button;
+};
+
+const createSendFrontButtonDom = ({
+  id,
+  onSendFrontClick,
+}: {
+  id: string;
+  onSendFrontClick: OnSendFrontClick;
+}) => {
+  const button = document.createElement("button");
+  button.textContent = "↑↑↑";
+  button.addEventListener("click", (e) => {
+    onSendFrontClick(e, id);
   });
   return button;
 };
