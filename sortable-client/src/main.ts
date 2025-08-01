@@ -35,6 +35,7 @@ import { handlers, itemActionHandlers } from "./yjs-dom/handler";
 import { domUtil } from "./yjs-dom/dom-util";
 import { loadDoms } from "./yjs-dom/dom-store";
 import { loadDebuger } from "./yjs-dom/debugger";
+import { insertAt } from "./utils/array";
 
 const connectWithDoc = async (docId: string) => {
   const apiClient = new ApiClient(CONFIG.SERVER_URL);
@@ -89,6 +90,8 @@ const main = async () => {
 
     todoListStore.order.observe((event) => {
       let index = 0;
+
+      console.log("event.delta", event.delta);
       event.delta.forEach((delta) => {
         console.log("delta", delta);
         if (delta.insert) {
@@ -98,21 +101,26 @@ const main = async () => {
           }
 
           const inserts: string[] = delta.insert;
-          const itemDoms: HTMLElement[] = [];
-          showToast(`inserted item: ${inserts}`);
 
           for (const insert of inserts) {
             const item = todoListStore.itemMap.get(insert);
+            if (!item) return;
 
-            if (item) {
-              itemDoms.push(
+            const tBodyDom = DomStore.tBodyDom;
+            const target = tBodyDom.children[index];
+            if (target) {
+              tBodyDom.insertBefore(
+                domUtil.createTodoItemDom(item, itemActionHandlers),
+                target
+              );
+            } else {
+              tBodyDom.append(
                 domUtil.createTodoItemDom(item, itemActionHandlers)
               );
             }
+            previousIds = insertAt(previousIds, index, insert);
+            index += 1;
           }
-
-          DomStore.tBodyDom.append(...itemDoms);
-          index += inserts.length;
         } else if (delta.retain) {
           index += delta.retain;
         } else if (delta.delete) {

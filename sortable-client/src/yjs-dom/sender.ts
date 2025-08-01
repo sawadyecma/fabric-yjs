@@ -1,4 +1,5 @@
 import { clientOrigin } from "../utils/client";
+import { generateUUID } from "../utils/uuid";
 import { todoListStore, type TodoItem } from "../yjs-util";
 
 const updateItemCompleted = (id: string, completed: boolean) => {
@@ -53,11 +54,33 @@ const sendForward = (id: string) => {
   const index = store.order.toArray().indexOf(id);
   if (index === -1) return;
   if (index === 0) return;
+  const item = store.itemMap.get(id);
+  if (!item) return;
+
+  // ['a', 'b', 'c', 'd', 'e']
+  // cを前に移動させる index:2
+  //
+  // delete(2)
+  // ['a', 'b', 'd', 'e'],
+  // insert(1, 'c')
+  // ['a', 'c', 'b', 'd', 'e']
+  const newItem = {
+    ...item,
+    id: generateUUID(),
+  };
 
   todoListStore.doc.transact(() => {
     store.order.delete(index);
-    store.order.insert(index - 1, [id]);
+    store.order.insert(index - 1, [newItem.id]);
+    store.itemMap.set(newItem.id, newItem);
+    store.itemMap.delete(id);
   });
+
+  // delta
+  // retain: 1
+  // insert: ['c'] → ['a', 'c', 'b', 'c', 'd', 'e']
+  // retain: 2 → ['a', 'c', 'b', 'c', 'd', 'e']
+  // delete: 1 → ['a', 'c', 'b', 'd', 'e']
 };
 
 export const sender = {

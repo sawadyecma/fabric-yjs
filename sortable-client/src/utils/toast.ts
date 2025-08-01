@@ -6,7 +6,7 @@ export function showToast(message: string, duration = 3000) {
     style.textContent = `
       .toast-container {
         position: fixed;
-        top: 1rem;
+        bottom: 1rem;
         right: 1rem;
         display: flex;
         flex-direction: column;
