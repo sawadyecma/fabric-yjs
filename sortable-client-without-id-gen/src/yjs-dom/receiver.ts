@@ -27,13 +27,29 @@ const clearAndReceiveAllItems = (ItemActionHandlers: ItemActionHandlers) => {
   }
 };
 
-const singleDeleteItem = (id: string) => {
+const getTr = (
+  tBodyDom: Exclude<typeof DomStore, null>["tBodyDom"],
+  id: string,
+  fromFirst: boolean = true
+) => {
+  if (fromFirst) {
+    const tr = tBodyDom.querySelector<HTMLTableRowElement>(
+      `tr[data-id="${id}"]`
+    );
+    return tr;
+  } else {
+    const trs = tBodyDom.querySelectorAll(`tr[data-id="${id}"]`);
+    if (trs.length === 0) return null;
+    return trs[trs.length - 1];
+  }
+};
+const singleDeleteItem = (id: string, fromFirst: boolean = true) => {
   if (!DomStore) return;
   const { tBodyDom } = DomStore;
 
   if (!todoListStore) return;
+  const tr = getTr(tBodyDom, id, fromFirst);
 
-  const tr = tBodyDom.querySelector(`tr[data-id="${id}"]`);
   if (!tr) return;
   tr.remove();
 };

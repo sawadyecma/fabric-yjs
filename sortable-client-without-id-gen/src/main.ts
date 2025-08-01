@@ -35,7 +35,7 @@ import { domUtil } from "./yjs-dom/dom-util";
 import { loadDoms } from "./yjs-dom/dom-store";
 import { loadDebuger } from "./yjs-dom/debugger";
 import { insertAt } from "./utils/array";
-import { isOriginOperation, isSameClient } from "./yjs-dom/origin";
+import { isSameClient } from "./yjs-dom/origin";
 
 const connectWithDoc = async (docId: string) => {
   const apiClient = new ApiClient(CONFIG.SERVER_URL);
@@ -75,7 +75,7 @@ const main = async () => {
     todoListStore.itemMap.observe((event) => {
       const origin = event.transaction.origin;
 
-      if (!isOriginOperation(origin)) throw Error("origin must be specified");
+      console.log("origin", origin);
 
       event.keysChanged.forEach((key) => {
         const item = todoListStore.itemMap.get(key);
@@ -93,11 +93,10 @@ const main = async () => {
 
     todoListStore.order.observe((event) => {
       let index = 0;
-      const origin = event.transaction.origin;
-
-      if (!isOriginOperation(origin)) throw Error("origin must be specified");
 
       console.log("event.delta", event.delta);
+      let insertedIndex: number | null = null;
+
       event.delta.forEach((delta) => {
         if (delta.insert) {
           if (!Array.isArray(delta.insert)) {
@@ -121,14 +120,22 @@ const main = async () => {
             previousIds = insertAt(previousIds, index, insert);
             index += 1;
           }
+          // 並べ替えの時に参照する用
+          insertedIndex = index;
         } else if (delta.retain) {
           index += delta.retain;
         } else if (delta.delete) {
           const deletedIds = previousIds.slice(index, index + delta.delete);
           const deletedSet = new Set(deletedIds);
-          showToast(`delete items: ${deletedIds}`);
-          deletedSet.forEach((id) => {
-            receiver.singleDeleteItem(id);
+
+          deletedIds.forEach((id, _index) => {
+            if (insertedIndex === null) {
+              // 後方に動いていることになる
+              receiver.singleDeleteItem(id);
+            } else {
+              // 前方に動いていることになる
+              receiver.singleDeleteItem(id, false);
+            }
           });
           previousIds = previousIds.filter((v) => !deletedSet.has(v));
         }
