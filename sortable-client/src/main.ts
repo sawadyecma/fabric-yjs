@@ -33,6 +33,7 @@ import {
 } from "./yjs-util";
 import { showToast } from "./utils/toast";
 import { generateUUID } from "./utils/uuid";
+import { clientOrigin } from "./utils/client";
 
 const connectWithDoc = async (docId: string) => {
   const apiClient = new ApiClient(CONFIG.SERVER_URL);
@@ -56,10 +57,36 @@ const connectWithDoc = async (docId: string) => {
 const tBodyDom =
   document.querySelector<HTMLTableSectionElement>("#todo-list tbody")!;
 
-const createCheckboxDom = (completed: boolean) => {
+const onCompleteCheckboxClick = (e: PointerEvent, id: string) => {
+  const target = e.target as HTMLInputElement;
+  const completed = target.checked;
+  updateItemCompleted(id, completed);
+};
+
+const updateItemCompleted = (id: string, completed: boolean) => {
+  if (!todoListStore) return;
+  const item = todoListStore.itemMap.get(id);
+  if (!item) {
+    throw Error("item is not found");
+  }
+
+  todoListStore.doc.transact(() => {
+    if (!todoListStore) return;
+
+    todoListStore.itemMap.set(id, {
+      ...item,
+      completed,
+    });
+  }, clientOrigin);
+};
+
+const createCheckboxDom = (completed: boolean, id: string) => {
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.checked = completed;
+  checkbox.addEventListener("click", (e) => {
+    onCompleteCheckboxClick(e, id);
+  });
   return checkbox;
 };
 
@@ -71,11 +98,12 @@ const createDeleteButtonDom = () => {
 
 const createTodoItemDom = (item: TodoItem) => {
   const tr = document.createElement("tr");
+  tr.dataset.id = item.id;
   const titleTd = document.createElement("td");
   const checkTd = document.createElement("td");
   const actionTd = document.createElement("td");
   titleTd.textContent = item.title;
-  checkTd.appendChild(createCheckboxDom(item.completed));
+  checkTd.appendChild(createCheckboxDom(item.completed, item.id));
   actionTd.appendChild(createDeleteButtonDom());
 
   tr.append(titleTd, checkTd, actionTd);
@@ -93,6 +121,15 @@ const renderTodoList = () => {
   }
 };
 
+const updateItemDom = (id: string, item: TodoItem) => {
+  const tr = tBodyDom.querySelector(`tr[data-id="${item.id}"]`);
+  if (!tr) return;
+  const checkbox = tr.querySelector(
+    "input[type='checkbox']"
+  ) as HTMLInputElement;
+  checkbox.checked = item.completed;
+};
+
 const main = async () => {
   const queryString = window.location.search;
   const params = new URLSearchParams(queryString);
@@ -108,11 +145,15 @@ const main = async () => {
   const startObserve = () => {
     todoListStore.itemMap.observe((event) => {
       event.keysChanged.forEach((key) => {
-        showToast(`updated item: ${key}`);
         const item = todoListStore.itemMap.get(key);
-        if (item) {
-          showToast(`updated item: ${item.title}`);
+        if (!item) return;
+        if (event.transaction.origin === clientOrigin) {
+          showToast(
+            `updated item: ${key} but origin is here. so skipped dom update`
+          );
+          return;
         }
+        updateItemDom(key, item);
       });
     });
 
