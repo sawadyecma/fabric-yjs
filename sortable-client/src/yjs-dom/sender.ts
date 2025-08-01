@@ -12,8 +12,6 @@ const updateItemCompleted = (id: string, completed: boolean) => {
   const store = todoListStore;
 
   todoListStore.doc.transact(() => {
-    if (!store) return;
-
     store.itemMap.set(id, {
       ...item,
       completed,
@@ -41,8 +39,6 @@ const deleteItem = (id: string) => {
   const store = todoListStore;
 
   todoListStore.doc.transact(() => {
-    if (!store) return;
-
     store.itemMap.delete(id);
     store.order.delete(store.order.toArray().indexOf(id));
   });
