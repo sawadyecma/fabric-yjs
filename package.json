@@ -12,6 +12,7 @@
     "server",
     "vanilla-client",
     "fabric-only-drawing-client",
-    "sortable-client"
+    "sortable-client",
+    "fabric-client"
   ]
 }
