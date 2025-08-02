@@ -1,8 +1,9 @@
 import { ApiClient } from "./api-client";
 import { CONFIG } from "./config";
-import { initFabric } from "./init-fabric";
-import { createYDoc, updateFabricObject } from "./yjs-util";
-import * as fabric from "fabric";
+import { initFabric } from "./fabric/init-fabric";
+import { createYDoc } from "./yjs-fabric/createYDocStore";
+import { observeYDoc } from "./yjs-fabric/observer";
+import { sender } from "./yjs-fabric/sender";
 
 console.log("fabric-client main.ts loaded");
 
@@ -17,42 +18,20 @@ const main = async () => {
   }
   const clientToken = fetched.data;
 
-  const alreadyAddedObjects = new Set<string>();
-
-  createYDoc({
+  const yDocStore = createYDoc({
     clientToken,
-    onSharedMapChange: (key, value) => {
-      if (alreadyAddedObjects.has(key)) {
-        return;
-      }
-      const fn = async () => {
-        console.log({ value });
-        const fabricObjects = await fabric.util.enlivenObjects([value]);
-        if (fabricObjects.length === 0) {
-          console.warn("No enlivened objects found for key:", key);
-          return;
-        }
-        const fabricObject = fabricObjects[0];
-        if (fabricObject instanceof fabric.FabricObject) {
-          canvas.add(fabricObject);
-        } else {
-          console.warn("Enlivened object is not a FabricObject:", fabricObject);
-        }
-      };
-
-      fn();
-    },
-    onSharedArrayChange: () => {
-      // console.log("Shared array changed:", event);
-    },
   });
+
+  observeYDoc(yDocStore);
 
   canvas.on("object:added", (event) => {
     const addedObject = event.target;
-    addedObject.id = addedObject.id || crypto.randomUUID();
-    alreadyAddedObjects.add(addedObject.id);
+    // 新規追加ではないので、senderには送信しない
+    if (addedObject.id) return;
 
-    updateFabricObject(addedObject.id, addedObject.toObject());
+    // ID発行
+    addedObject.id = crypto.randomUUID();
+    sender.sendAddedObject(addedObject);
   });
 };
 

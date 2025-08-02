@@ -1,15 +1,17 @@
 import * as Y from "yjs";
-import { createYjsProvider, YSweetProvider } from "@y-sweet/client";
+import { createYjsProvider } from "@y-sweet/client";
 import type { ClientToken } from "@y-sweet/sdk";
 import * as fabric from "fabric";
-import { clientOrigin } from "./yjs-fabric/clientOrigin";
+import { clientOrigin } from "./clientOrigin";
+import type { YDocStoreType } from "./type";
 
-export const docStore: {
-  objectMap: Y.Map<fabric.FabricObject>;
-  objectOrder: Y.Array<string>;
-  provider: YSweetProvider;
-  undoManager: Y.UndoManager;
-} | null = null;
+export let YDocStore: YDocStoreType | null = null;
+export const getYDocStore = () => {
+  if (!YDocStore) {
+    throw new Error("YDocStore is not initialized");
+  }
+  return YDocStore;
+};
 
 export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
   const doc = new Y.Doc();
@@ -25,11 +27,14 @@ export const createYDoc = ({ clientToken }: { clientToken: ClientToken }) => {
     trackedOrigins: new Set([clientOrigin]),
   });
 
-  const docStore = {
+  const docStore: YDocStoreType = {
     objectMap,
     objectOrder,
     provider,
     undoManager,
+    doc,
   };
+
+  YDocStore = docStore;
   return docStore;
 };

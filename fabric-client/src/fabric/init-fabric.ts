@@ -28,5 +28,16 @@ export const initFabric = () => {
 
   canvas.requestRenderAll();
 
+  fabricCanvas = canvas;
+
   return canvas;
+};
+
+let fabricCanvas: fabric.Canvas | null = null;
+
+export const getFabricCanvas = () => {
+  if (!fabricCanvas) {
+    throw new Error("Fabric canvas not found");
+  }
+  return { canvas: fabricCanvas };
 };
