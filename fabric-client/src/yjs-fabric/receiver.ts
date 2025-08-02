@@ -48,10 +48,15 @@ const receiveAddedObject = (object: fabric.FabricObject) => {
 
 const receiveRemovedObject = (id: string) => {
   const { canvas } = getFabricCanvas();
-  const object = canvas.getObjects().find((obj) => obj.id === id);
+  const fabricHandlerManager = getFabricHandlerManager();
+  fabricHandlerManager.stopHandlers();
+
+  const object = canvas.getObjectById(id);
   if (object) {
     canvas.remove(object);
   }
+
+  fabricHandlerManager.startHandlers();
 };
 
 export const receiver = {

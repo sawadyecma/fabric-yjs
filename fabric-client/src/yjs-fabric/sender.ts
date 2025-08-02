@@ -26,13 +26,21 @@ const sendRemovedObject = (object: fabric.FabricObject) => {
     console.warn("Object has no id");
     return;
   }
-
   const { doc, objectMap, objectOrder } = getYDocStore();
 
-  const index = objectOrder.toArray().indexOf(id);
+  // すでに削除済みの時は送信しない
+  const _object = objectMap.get(id);
+  if (!_object) {
+    console.warn("Object not found");
+    return;
+  }
+
+  console.log(`id: ${id} will be removed`);
+
   doc.transact((tr) => {
     txMetaUtil.setOpTypeToTxMeta(tr, "remove");
     objectMap.delete(id);
+    const index = objectOrder.toArray().indexOf(id);
     objectOrder.delete(index);
   }, clientOrigin);
 };

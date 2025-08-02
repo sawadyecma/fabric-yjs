@@ -27,6 +27,10 @@ export class AppCanvas extends fabric.Canvas {
     return this.objectsMap.get(id);
   }
 
+  getObjectByIndex(index: number): fabric.FabricObject | undefined {
+    return this.getObjects()[index] ?? undefined;
+  }
+
   removeAllObjects() {
     const objects = this.getObjects();
     this.remove(...objects);

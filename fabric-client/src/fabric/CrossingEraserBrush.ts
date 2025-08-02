@@ -58,6 +58,7 @@ export class CrossingEraserBrush extends fabric.PencilBrush {
 
   onMouseUp(options: fabric.TEvent) {
     const result = super.onMouseUp(options);
+
     this.canvas.remove(...this.highlighted);
     this.highlighted.clear();
     this.canvas.requestRenderAll();

@@ -1,4 +1,5 @@
 import { showToast } from "../dom/toast";
+import { getFabricCanvas } from "../fabric/init-fabric";
 import { clientOrigin } from "./clientOrigin";
 import { getYDocStore } from "./createYDocStore";
 import { receiver } from "./receiver";
@@ -9,9 +10,9 @@ import type {
   YDocStoreType,
 } from "./type";
 
-const observeObjectMap: ObserveObjectMapFn = (event, transaction) => {
+const observeObjectMap: ObserveObjectMapFn = (event, _transaction) => {
   // const { objectMap } = getYDocStore();
-  console.log(event, transaction);
+  // console.log(event, transaction);
   event.keysChanged.forEach((_key) => {
     // TODO
   });
@@ -28,6 +29,8 @@ const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
     if (opType === "add") return;
     if (opType === "remove") return;
   }
+
+  console.log("delta", event.delta);
 
   event.delta.forEach((delta) => {
     if (delta.insert) {
@@ -47,7 +50,10 @@ const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
     } else if (delta.retain) {
       index += delta.retain;
     } else if (delta.delete) {
-      receiver.receiveAddedObject;
+      const { canvas } = getFabricCanvas();
+      const obj = canvas.getObjectByIndex(index);
+      if (!obj?.id) return;
+      receiver.receiveRemovedObject(obj.id);
     }
   });
 };
