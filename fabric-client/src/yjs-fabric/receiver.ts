@@ -1,11 +1,17 @@
 import { getFabricCanvas } from "../fabric/init-fabric";
+import { getFabricHandlerManager } from "./fabric-handler-manager";
 import type { YDocStoreType } from "./type";
 import * as fabric from "fabric";
 
 const clearAndReceiveAllObjects = async (yDocStore: YDocStoreType) => {
   const { canvas } = getFabricCanvas();
+  const fabricHandlerManager = getFabricHandlerManager();
   const { objectMap, objectOrder } = yDocStore;
-  // canvas.clear();
+
+  fabricHandlerManager.stopHandlers();
+
+  canvas.removeAllObjects();
+
   const ids = objectOrder.toArray();
   const objects: fabric.FabricObject[] = [];
   for (const id of ids) {
@@ -19,6 +25,8 @@ const clearAndReceiveAllObjects = async (yDocStore: YDocStoreType) => {
   )) as fabric.FabricObject[];
 
   canvas.add(...fabricObjects);
+
+  fabricHandlerManager.startHandlers();
 };
 
 const receiveAddedObject = (object: fabric.FabricObject) => {
@@ -38,7 +46,16 @@ const receiveAddedObject = (object: fabric.FabricObject) => {
   asyncFn();
 };
 
+const receiveRemovedObject = (id: string) => {
+  const { canvas } = getFabricCanvas();
+  const object = canvas.getObjects().find((obj) => obj.id === id);
+  if (object) {
+    canvas.remove(object);
+  }
+};
+
 export const receiver = {
   clearAndReceiveAllObjects,
   receiveAddedObject,
+  receiveRemovedObject,
 };

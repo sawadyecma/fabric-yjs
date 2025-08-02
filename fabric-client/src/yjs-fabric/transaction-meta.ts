@@ -1,11 +1,17 @@
 import * as Y from "yjs";
 
+/**
+ * トランザクションメタデータに操作タイプを設定する
+ *
+ * 同じクライアントでしかmetaは取得できないため、注意
+ */
+
 const KEY_OPERATION_TYPE = "operationType";
 
 const OPERATION = {
   ADD: "add",
   UPDATE: "update",
-  DELETE: "delete",
+  REMOVE: "remove",
 } as const;
 
 // 操作タイプ

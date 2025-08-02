@@ -21,10 +21,12 @@ const observeObjectMap: ObserveObjectMapFn = (event, transaction) => {
 const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
   const { objectMap } = getYDocStore();
   let index: number = 0;
-  const opType = txMetaUtil.getOpTypeFromTxMeta(transaction);
 
   if (transaction.origin === clientOrigin) {
+    // opTypeは同じクライアントでしか取得できないため、注意
+    const opType = txMetaUtil.getOpTypeFromTxMeta(transaction);
     if (opType === "add") return;
+    if (opType === "remove") return;
   }
 
   event.delta.forEach((delta) => {
@@ -45,6 +47,7 @@ const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
     } else if (delta.retain) {
       index += delta.retain;
     } else if (delta.delete) {
+      receiver.receiveAddedObject;
     }
   });
 };

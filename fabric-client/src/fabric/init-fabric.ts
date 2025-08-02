@@ -1,4 +1,5 @@
 import * as fabric from "fabric";
+import { AppCanvas } from "./AppCanvas";
 
 // FabricObjectにカスタムプロパティを定義
 declare module "fabric" {
@@ -19,7 +20,7 @@ export const initFabric = () => {
     throw new Error("Canvas element not found");
   }
 
-  const canvas = new fabric.Canvas(canvasEle, {
+  const canvas = new AppCanvas(canvasEle, {
     backgroundColor: "#f0f0f0",
   });
 
@@ -33,7 +34,7 @@ export const initFabric = () => {
   return canvas;
 };
 
-let fabricCanvas: fabric.Canvas | null = null;
+let fabricCanvas: AppCanvas | null = null;
 
 export const getFabricCanvas = () => {
   if (!fabricCanvas) {
