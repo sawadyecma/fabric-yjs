@@ -114,7 +114,17 @@ const onSendToFront = () => {
 };
 
 const onSendToBack = () => {
-  throw new Error("Not implemented");
+  const { canvas } = getFabricCanvas();
+  const activeObjects = canvas.getActiveObjects();
+  if (!activeObjects.length) return;
+
+  /**
+   * 後方のobjectから最背面に持っていくので、逆順にすると位置関係を維持できる
+   */
+  activeObjects.reverse().forEach((obj) => {
+    canvas.sendObjectToBack(obj);
+    sender.sendBringObjectToBack(obj);
+  });
 };
 
 const onSendForward = () => {

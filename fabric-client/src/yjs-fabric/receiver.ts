@@ -1,35 +1,32 @@
 import { getFabricCanvas } from "../fabric/init-fabric";
+import { getYDocStore } from "./createYDocStore";
 import { getFabricHandlerManager } from "./fabric-handler-manager";
-import type { YDocStoreType } from "./type";
 import * as fabric from "fabric";
 
-const clearAndReceiveAllObjects = async (yDocStore: YDocStoreType) => {
+const clearAndReceiveAllObjects = async () => {
   const { canvas } = getFabricCanvas();
   const fabricHandlerManager = getFabricHandlerManager();
-  const { objectMap, objectOrder } = yDocStore;
+  const { objectMap, objectOrder } = getYDocStore();
 
   fabricHandlerManager.stopHandlers();
 
   canvas.removeAllObjects();
 
   const ids = objectOrder.toArray();
-  const objects: fabric.FabricObject[] = [];
-  for (const id of ids) {
-    const object = objectMap.get(id);
-    if (object) {
-      objects.push(object);
-    }
-  }
-  const fabricObjects = (await fabric.util.enlivenObjects(
-    objects
-  )) as fabric.FabricObject[];
+  const objects: fabric.FabricObject[] = ids
+    .map((id) => objectMap.get(id))
+    .filter((v): v is fabric.FabricObject => Boolean(v));
+
+  const fabricObjects = (await fabric.util.enlivenObjects(objects)).filter(
+    (v) => v instanceof fabric.FabricObject
+  );
 
   canvas.add(...fabricObjects);
 
   fabricHandlerManager.startHandlers();
 };
 
-const receiveAddedObject = (object: fabric.FabricObject) => {
+const receiveAddedObject = async (object: fabric.FabricObject) => {
   const { canvas } = getFabricCanvas();
   console.log("receiveAddedObject", object);
 
@@ -43,7 +40,7 @@ const receiveAddedObject = (object: fabric.FabricObject) => {
     canvas.add(fabricObject);
   };
 
-  asyncFn();
+  await asyncFn();
 };
 
 const receiveRemovedObject = (id: string) => {
@@ -59,7 +56,7 @@ const receiveRemovedObject = (id: string) => {
   fabricHandlerManager.startHandlers();
 };
 
-const receiveModifiedObject = (object: fabric.FabricObject) => {
+const receiveModifiedObject = async (object: fabric.FabricObject) => {
   const { canvas } = getFabricCanvas();
 
   const asyncFn = async () => {
@@ -80,7 +77,7 @@ const receiveModifiedObject = (object: fabric.FabricObject) => {
     canvas.replace(fabricObject.id, fabricObject);
   };
 
-  asyncFn();
+  await asyncFn();
 };
 
 export const receiver = {

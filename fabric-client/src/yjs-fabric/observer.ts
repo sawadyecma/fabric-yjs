@@ -1,3 +1,7 @@
+import * as Y from "yjs";
+import type { YEvent } from "yjs";
+import * as fabric from "fabric";
+import { ActiveSelection } from "fabric";
 import { showToast } from "../dom/toast";
 import { getFabricCanvas } from "../fabric/init-fabric";
 import { clientOrigin } from "./clientOrigin";
@@ -30,45 +34,93 @@ const observeObjectMap: ObserveObjectMapFn = (event, transaction) => {
   return;
 };
 
-const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
-  const { objectMap } = getYDocStore();
-  let index: number = 0;
+const checkHasDeleteAndInsert = (delta: YEvent<Y.Array<string>>["delta"]) => {
+  let hasInsert = false;
+  let hasDelete = false;
+  delta.forEach((delta) => {
+    if (delta.insert) {
+      hasInsert = true;
+    }
+    if (delta.delete) {
+      hasDelete = true;
+    }
+  });
+  return hasInsert && hasDelete;
+};
 
+const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
+  console.log("delta", event.delta);
   if (transaction.origin === clientOrigin) {
+    // 結局、fabric.js→Yjsの変換が綺麗にまとまる
+    return;
+
     // opTypeは同じクライアントでしか取得できないため、注意
     const opType = txMetaUtil.getOpTypeFromTxMeta(transaction);
     if (opType === "add") return;
     if (opType === "remove") return;
+    if (opType === "modify") return;
     if (opType === "bring-object-front") return;
+    if (opType === "bring-object-back") return;
   }
 
-  console.log("delta", event.delta);
+  const hasDeleteAndInsert = checkHasDeleteAndInsert(event.delta);
+
+  queueMicrotask(async () => {
+    if (hasDeleteAndInsert) {
+      const { canvas } = getFabricCanvas();
+      const activeObjects = canvas.getActiveObjects();
+      const activeIds = activeObjects
+        .map((object) => object.id)
+        .filter((v): v is string => Boolean(v));
+      canvas.discardActiveObject();
+
+      await receiver.clearAndReceiveAllObjects();
+
+      if (activeIds.length > 0) {
+        const actives = activeIds
+          .map((id) => canvas.getObjectById(id))
+          .filter((v): v is fabric.FabricObject => Boolean(v));
+        const activeSelection = new ActiveSelection(actives);
+        canvas.setActiveObject(activeSelection);
+      }
+      return;
+    }
+  });
+
+  if (hasDeleteAndInsert) {
+    return;
+  }
+
+  let index: number = 0;
 
   event.delta.forEach((delta) => {
-    if (delta.insert) {
-      if (!Array.isArray(delta.insert)) {
-        console.log("delta.insert should be an array, but was not.");
-        return;
+    queueMicrotask(async () => {
+      const { objectMap } = getYDocStore();
+
+      if (delta.insert) {
+        if (!Array.isArray(delta.insert)) {
+          console.log("delta.insert should be an array, but was not.");
+          return;
+        }
+
+        const inserts: string[] = delta.insert;
+        for (const key of inserts) {
+          // すでに追加されているオブジェクトは、追加しない
+          // 並び替えの時は状況は変わるかも
+          const object = objectMap.get(key);
+          if (!object) return;
+          await receiver.receiveAddedObject(object);
+          index += 1;
+        }
+      } else if (delta.retain) {
+        index += delta.retain;
+      } else if (delta.delete) {
+        const { canvas } = getFabricCanvas();
+        const obj = canvas.getObjectByIndex(index);
+        if (!obj?.id) return;
+        receiver.receiveRemovedObject(obj.id);
       }
-
-      const inserts: string[] = delta.insert;
-      inserts.forEach((key) => {
-        // すでに追加されているオブジェクトは、追加しない
-        // 並び替えの時は状況は変わるかも
-        const object = objectMap.get(key);
-        if (!object) return;
-        receiver.receiveAddedObject(object);
-      });
-
-      index += delta.insert.length;
-    } else if (delta.retain) {
-      index += delta.retain;
-    } else if (delta.delete) {
-      const { canvas } = getFabricCanvas();
-      const obj = canvas.getObjectByIndex(index);
-      if (!obj?.id) return;
-      receiver.receiveRemovedObject(obj.id);
-    }
+    });
   });
 };
 
@@ -97,16 +149,17 @@ const startDiffObserve = (
 
 export const observeYDoc = (yDocStore: YDocStoreType) => {
   let unobserve: (() => void) | undefined;
-  yDocStore.provider.on("synced", async () => {
+  yDocStore.provider.on("synced", () => {
     unobserve?.();
 
     showToast("synced");
-    await receiver.clearAndReceiveAllObjects(yDocStore);
-    showToast("cleared");
-
-    unobserve = startDiffObserve(yDocStore, {
-      observeObjectMap,
-      observeObjectOrder,
+    queueMicrotask(async () => {
+      await receiver.clearAndReceiveAllObjects();
+      showToast("cleared");
+      unobserve = startDiffObserve(yDocStore, {
+        observeObjectMap,
+        observeObjectOrder,
+      });
     });
   });
 };
