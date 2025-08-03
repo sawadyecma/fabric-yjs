@@ -66,9 +66,7 @@ const onColorChange = async (color: string) => {
 
 const onDeleteActiveObjects = () => {
   const { canvas } = getFabricCanvas();
-  const actives = canvas.getActiveObjects();
-  canvas.remove(...actives);
-  canvas.discardActiveObject(); // これがないと表示から即消えてくれない
+  canvas.removeActiveObjects();
 };
 
 export const toolSelectorHandlers = {

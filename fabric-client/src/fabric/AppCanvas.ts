@@ -59,4 +59,10 @@ export class AppCanvas extends fabric.Canvas {
     this.remove(...objects);
     this.objectsMap.clear();
   }
+
+  removeActiveObjects() {
+    const actives = this.getActiveObjects();
+    this.remove(...actives);
+    this.discardActiveObject(); // これがないと表示から即消えてくれない
+  }
 }
