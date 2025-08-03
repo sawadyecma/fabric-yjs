@@ -8,7 +8,15 @@ const onPencilToolClick = () => {
   const { canvas } = getFabricCanvas();
 
   canvas.isDrawingMode = true;
-  const pencilBrush = new PencilBrush(canvas);
+  class MyPencilBrush extends PencilBrush {
+    _finalizeAndAddPath() {
+      super._finalizeAndAddPath();
+      const randomColor =
+        "#" + Math.floor(Math.random() * 16777215).toString(16);
+      this.color = randomColor;
+    }
+  }
+  const pencilBrush = new MyPencilBrush(canvas);
   pencilBrush.width = 10;
   canvas.freeDrawingBrush = pencilBrush;
 };

@@ -15,6 +15,8 @@ const observeObjectMap: ObserveObjectMapFn = (event, transaction) => {
     // opTypeは同じクライアントでしか取得できないため、注意
     const opType = txMetaUtil.getOpTypeFromTxMeta(transaction);
     if (opType === "modify") return;
+    if (opType === "add") return;
+    if (opType === "remove") return;
   }
 
   const { objectMap } = getYDocStore();
