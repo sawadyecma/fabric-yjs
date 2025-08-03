@@ -3,11 +3,13 @@ export const createToolSelector = ({
   onEraserToolClick,
   onSelectToolClick,
   onColorChange,
+  onDeleteActiveObjects,
 }: {
   onPencilToolClick: () => void;
   onEraserToolClick: () => void;
   onSelectToolClick: () => void;
   onColorChange: (color: string) => void;
+  onDeleteActiveObjects: () => void;
 }) => {
   // ツールの種類
   // - ペン
@@ -64,7 +66,10 @@ export const createToolSelector = ({
   eraserTool.addEventListener("click", () => changeTool("eraser"));
   selectTool.addEventListener("click", () => changeTool("select"));
 
-  const selectToolOptions = createSelectToolOptions({ onColorChange });
+  const selectToolOptions = createSelectToolOptions({
+    onColorChange,
+    onDeleteActiveObjects,
+  });
   selectToolOptions.style.display = selectToolOptions.style.display =
     selectToolOptionsDisplayStyle();
   toolSelector.appendChild(selectToolOptions);
@@ -74,8 +79,10 @@ export const createToolSelector = ({
 
 const createSelectToolOptions = ({
   onColorChange,
+  onDeleteActiveObjects,
 }: {
   onColorChange: (color: string) => void;
+  onDeleteActiveObjects: () => void;
 }) => {
   const selectToolOptions = document.createElement("div");
   selectToolOptions.id = "select-tool-options";
@@ -103,8 +110,16 @@ const createSelectToolOptions = ({
     onColorChange(currentColor);
   });
 
+  const deleteActiveObjectsButton = document.createElement("button");
+  deleteActiveObjectsButton.id = "delete-active-objects-button";
+  deleteActiveObjectsButton.textContent = "Delete Active Objects";
+  deleteActiveObjectsButton.addEventListener("click", () => {
+    onDeleteActiveObjects();
+  });
+
   selectToolOptions.appendChild(colorInput);
   selectToolOptions.appendChild(changeColorButton);
+  selectToolOptions.appendChild(deleteActiveObjectsButton);
 
   return selectToolOptions;
 };

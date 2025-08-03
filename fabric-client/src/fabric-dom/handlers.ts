@@ -64,9 +64,17 @@ const onColorChange = async (color: string) => {
   canvas.requestRenderAll();
 };
 
+const onDeleteActiveObjects = () => {
+  const { canvas } = getFabricCanvas();
+  const actives = canvas.getActiveObjects();
+  canvas.remove(...actives);
+  canvas.discardActiveObject(); // これがないと表示から即消えてくれない
+};
+
 export const toolSelectorHandlers = {
   onPencilToolClick,
   onEraserToolClick,
   onSelectToolClick,
   onColorChange,
+  onDeleteActiveObjects,
 };
