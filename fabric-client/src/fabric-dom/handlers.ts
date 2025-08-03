@@ -3,6 +3,7 @@ import { CrossingEraserBrush } from "../fabric/CrossingEraserBrush";
 import { getFabricCanvas } from "../fabric/init-fabric";
 import { PencilBrush } from "fabric";
 import * as fabric from "fabric";
+import { getYDocStore } from "../yjs-fabric/createYDocStore";
 
 const onPencilToolClick = () => {
   const { canvas } = getFabricCanvas();
@@ -77,10 +78,25 @@ const onDeleteActiveObjects = () => {
   canvas.removeActiveObjects();
 };
 
+const onUndo = () => {
+  const { undoManager } = getYDocStore();
+  undoManager.undo();
+};
+
+const onRedo = () => {
+  const { undoManager } = getYDocStore();
+  undoManager.redo();
+};
+
 export const toolSelectorHandlers = {
   onPencilToolClick,
   onEraserToolClick,
   onSelectToolClick,
   onColorChange,
   onDeleteActiveObjects,
+};
+
+export const redoUndoSectionHandlers = {
+  onUndo,
+  onRedo,
 };

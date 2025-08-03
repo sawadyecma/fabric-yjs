@@ -3,8 +3,13 @@ export const loadDefaultDoms = () => {
     "#tool-selector-wrapper"
   )!;
 
+  const redoUndoSectionWrapper = document.querySelector<HTMLDivElement>(
+    "#redo-undo-section-wrapper"
+  )!;
+
   const _domStore = {
     toolSelectorWrapper,
+    redoUndoSectionWrapper,
   };
 
   domStore = _domStore;

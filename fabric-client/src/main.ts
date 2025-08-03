@@ -1,8 +1,12 @@
 import { ApiClient } from "./api-client";
 import { CONFIG } from "./config";
 import { loadDefaultDoms } from "./dom/default-dom";
+import { createRedoUndoSection } from "./dom/redo-undo-section";
 import { createToolSelector } from "./dom/tool-selector";
-import { toolSelectorHandlers } from "./fabric-dom/handlers";
+import {
+  redoUndoSectionHandlers,
+  toolSelectorHandlers,
+} from "./fabric-dom/handlers";
 import { initFabric } from "./fabric/init-fabric";
 import { createYDoc } from "./yjs-fabric/createYDocStore";
 import { initFabricHanlderManager } from "./yjs-fabric/fabric-handler-manager";
@@ -18,6 +22,10 @@ const main = async () => {
 
   domStore.toolSelectorWrapper.appendChild(
     createToolSelector(toolSelectorHandlers)
+  );
+
+  domStore.redoUndoSectionWrapper.appendChild(
+    createRedoUndoSection(redoUndoSectionHandlers)
   );
 
   const apiClient = new ApiClient(CONFIG.SERVER_URL);

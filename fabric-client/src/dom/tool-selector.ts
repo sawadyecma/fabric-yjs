@@ -32,18 +32,17 @@ export const createToolSelector = ({
   selectTool.id = "select-tool";
   selectTool.textContent = "Select";
   selectTool.addEventListener("click", onSelectToolClick);
-  toolSelector.appendChild(selectTool);
 
   pencilTool.id = "pencil-tool";
   pencilTool.textContent = "Pencil";
   pencilTool.addEventListener("click", onPencilToolClick);
-  toolSelector.appendChild(pencilTool);
 
   const eraserTool = document.createElement("button");
   eraserTool.id = "eraser-tool";
   eraserTool.textContent = "Eraser";
   eraserTool.addEventListener("click", onEraserToolClick);
-  toolSelector.appendChild(eraserTool);
+
+  const title = document.createElement("h3");
 
   type Tool = "pencil" | "eraser" | "select";
   let currentTool: Tool = "select";
@@ -60,6 +59,7 @@ export const createToolSelector = ({
     if (currentTool === "select") {
       selectToolOptions.style.display = selectToolOptionsDisplayStyle();
     }
+    title.textContent = `Current Tool: ${currentTool}`;
   };
 
   pencilTool.addEventListener("click", () => changeTool("pencil"));
@@ -72,6 +72,17 @@ export const createToolSelector = ({
   });
   selectToolOptions.style.display = selectToolOptions.style.display =
     selectToolOptionsDisplayStyle();
+
+  /**
+   *
+   * Domのappend
+   */
+
+  title.textContent = `Current Tool: ${currentTool}`;
+  toolSelector.appendChild(title);
+  toolSelector.appendChild(selectTool);
+  toolSelector.appendChild(pencilTool);
+  toolSelector.appendChild(eraserTool);
   toolSelector.appendChild(selectToolOptions);
 
   return toolSelector;
