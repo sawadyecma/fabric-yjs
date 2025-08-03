@@ -12,6 +12,7 @@ const OPERATION = {
   ADD: "add",
   MODIFY: "modify",
   REMOVE: "remove",
+  BRING_OBJECT_FRONT: "bring-object-front",
 } as const;
 
 // 操作タイプ

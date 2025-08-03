@@ -17,6 +17,7 @@ const observeObjectMap: ObserveObjectMapFn = (event, transaction) => {
     if (opType === "modify") return;
     if (opType === "add") return;
     if (opType === "remove") return;
+    if (opType === "bring-object-front") return;
   }
 
   const { objectMap } = getYDocStore();
@@ -38,6 +39,7 @@ const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
     const opType = txMetaUtil.getOpTypeFromTxMeta(transaction);
     if (opType === "add") return;
     if (opType === "remove") return;
+    if (opType === "bring-object-front") return;
   }
 
   console.log("delta", event.delta);

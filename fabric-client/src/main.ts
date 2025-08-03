@@ -3,9 +3,11 @@ import { CONFIG } from "./config";
 import { loadDefaultDoms } from "./dom/default-dom";
 import { createRedoUndoSection } from "./dom/redo-undo-section";
 import { createToolSelector } from "./dom/tool-selector";
+import { createZIndexSection } from "./dom/z-index-section";
 import {
   redoUndoSectionHandlers,
   toolSelectorHandlers,
+  zIndexSectionHandlers,
 } from "./fabric-dom/handlers";
 import { initFabric } from "./fabric/init-fabric";
 import { createYDoc } from "./yjs-fabric/createYDocStore";
@@ -26,6 +28,10 @@ const main = async () => {
 
   domStore.redoUndoSectionWrapper.appendChild(
     createRedoUndoSection(redoUndoSectionHandlers)
+  );
+
+  domStore.zIndexSectionWrapper.appendChild(
+    createZIndexSection(zIndexSectionHandlers)
   );
 
   const apiClient = new ApiClient(CONFIG.SERVER_URL);

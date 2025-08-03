@@ -7,9 +7,14 @@ export const loadDefaultDoms = () => {
     "#redo-undo-section-wrapper"
   )!;
 
+  const zIndexSectionWrapper = document.querySelector<HTMLDivElement>(
+    "#z-index-section-wrapper"
+  )!;
+
   const _domStore = {
     toolSelectorWrapper,
     redoUndoSectionWrapper,
+    zIndexSectionWrapper,
   };
 
   domStore = _domStore;

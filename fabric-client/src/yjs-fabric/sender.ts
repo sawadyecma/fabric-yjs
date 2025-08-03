@@ -59,8 +59,29 @@ const sendModifiedObject = (object: fabric.FabricObject) => {
   }, clientOrigin);
 };
 
+const sendBringObjectFront = (object: fabric.FabricObject) => {
+  const { objectOrder, doc } = getYDocStore();
+
+  const id = object.id;
+  if (!id) {
+    console.warn("Object has no id");
+    return;
+  }
+
+  doc.transact((tr) => {
+    txMetaUtil.setOpTypeToTxMeta(tr, "bring-object-front");
+    const previousOrder = objectOrder.toArray();
+
+    const index = previousOrder.indexOf(id);
+    previousOrder.splice(index, 1);
+    objectOrder.delete(index);
+    objectOrder.insert(previousOrder.length, [id]);
+  }, clientOrigin);
+};
+
 export const sender = {
   sendAddedObject,
   sendRemovedObject,
   sendModifiedObject,
+  sendBringObjectFront,
 };

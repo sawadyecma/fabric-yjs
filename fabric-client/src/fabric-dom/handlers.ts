@@ -4,6 +4,7 @@ import { getFabricCanvas } from "../fabric/init-fabric";
 import { PencilBrush } from "fabric";
 import * as fabric from "fabric";
 import { getYDocStore } from "../yjs-fabric/createYDocStore";
+import { sender } from "../yjs-fabric/sender";
 
 const onPencilToolClick = () => {
   const { canvas } = getFabricCanvas();
@@ -99,4 +100,34 @@ export const toolSelectorHandlers = {
 export const redoUndoSectionHandlers = {
   onUndo,
   onRedo,
+};
+
+const onSendToFront = () => {
+  const { canvas } = getFabricCanvas();
+  const activeObjects = canvas.getActiveObjects();
+  if (!activeObjects.length) return;
+
+  activeObjects.forEach((obj) => {
+    canvas.bringObjectToFront(obj);
+    sender.sendBringObjectFront(obj);
+  });
+};
+
+const onSendToBack = () => {
+  throw new Error("Not implemented");
+};
+
+const onSendForward = () => {
+  throw new Error("Not implemented");
+};
+
+const onSendBackward = () => {
+  throw new Error("Not implemented");
+};
+
+export const zIndexSectionHandlers = {
+  onSendToFront,
+  onSendToBack,
+  onSendForward,
+  onSendBackward,
 };
