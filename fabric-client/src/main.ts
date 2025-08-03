@@ -35,7 +35,7 @@ const main = async () => {
   );
 
   const apiClient = new ApiClient(CONFIG.SERVER_URL);
-  const fetched = await apiClient.fetchYSweetToken("fabric-doc-id2");
+  const fetched = await apiClient.fetchYSweetToken("fabric-doc-id3");
   if (!fetched.ok) {
     console.error("Failed to fetch Y-Sweet token:", fetched.error);
     return;
