@@ -2,10 +2,12 @@ export const createToolSelector = ({
   onPencilToolClick,
   onEraserToolClick,
   onSelectToolClick,
+  onColorChange,
 }: {
   onPencilToolClick: () => void;
   onEraserToolClick: () => void;
   onSelectToolClick: () => void;
+  onColorChange: (color: string) => void;
 }) => {
   // ツールの種類
   // - ペン
@@ -23,6 +25,13 @@ export const createToolSelector = ({
   const toolSelector = document.createElement("div");
   toolSelector.id = "tool-selector";
   const pencilTool = document.createElement("button");
+
+  const selectTool = document.createElement("button");
+  selectTool.id = "select-tool";
+  selectTool.textContent = "Select";
+  selectTool.addEventListener("click", onSelectToolClick);
+  toolSelector.appendChild(selectTool);
+
   pencilTool.id = "pencil-tool";
   pencilTool.textContent = "Pencil";
   pencilTool.addEventListener("click", onPencilToolClick);
@@ -34,11 +43,68 @@ export const createToolSelector = ({
   eraserTool.addEventListener("click", onEraserToolClick);
   toolSelector.appendChild(eraserTool);
 
-  const selectTool = document.createElement("button");
-  selectTool.id = "select-tool";
-  selectTool.textContent = "Select";
-  selectTool.addEventListener("click", onSelectToolClick);
-  toolSelector.appendChild(selectTool);
+  type Tool = "pencil" | "eraser" | "select";
+  let currentTool: Tool = "select";
+
+  const selectToolOptionsDisplayStyle = (): string => {
+    if (currentTool === "select") {
+      return "block";
+    }
+    return "none";
+  };
+
+  const changeTool = (tool: Tool) => {
+    currentTool = tool;
+    if (currentTool === "select") {
+      selectToolOptions.style.display = selectToolOptionsDisplayStyle();
+    }
+  };
+
+  pencilTool.addEventListener("click", () => changeTool("pencil"));
+  eraserTool.addEventListener("click", () => changeTool("eraser"));
+  selectTool.addEventListener("click", () => changeTool("select"));
+
+  const selectToolOptions = createSelectToolOptions({ onColorChange });
+  selectToolOptions.style.display = selectToolOptions.style.display =
+    selectToolOptionsDisplayStyle();
+  toolSelector.appendChild(selectToolOptions);
 
   return toolSelector;
+};
+
+const createSelectToolOptions = ({
+  onColorChange,
+}: {
+  onColorChange: (color: string) => void;
+}) => {
+  const selectToolOptions = document.createElement("div");
+  selectToolOptions.id = "select-tool-options";
+
+  const colorInput = document.createElement("input");
+  colorInput.type = "color";
+  colorInput.id = "color-input";
+  colorInput.value = "#000000";
+
+  let currentColor = "#000000";
+  const isRgb = (color: string) => {
+    const rgbRegex = /^#([0-9a-fA-F]{6})$/;
+    return rgbRegex.test(color);
+  };
+  colorInput.addEventListener("change", (e) => {
+    const color = (e.target as HTMLInputElement).value;
+    if (!isRgb(color)) return;
+    currentColor = color;
+  });
+
+  const changeColorButton = document.createElement("button");
+  changeColorButton.id = "change-color-button";
+  changeColorButton.textContent = "Change Color";
+  changeColorButton.addEventListener("click", () => {
+    onColorChange(currentColor);
+  });
+
+  selectToolOptions.appendChild(colorInput);
+  selectToolOptions.appendChild(changeColorButton);
+
+  return selectToolOptions;
 };

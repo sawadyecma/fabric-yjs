@@ -45,7 +45,22 @@ const sendRemovedObject = (object: fabric.FabricObject) => {
   }, clientOrigin);
 };
 
+const sendModifiedObject = (object: fabric.FabricObject) => {
+  const id = object.id;
+  if (!id) {
+    console.warn("Object has no id");
+    return;
+  }
+  const { doc, objectMap } = getYDocStore();
+
+  doc.transact((tr) => {
+    txMetaUtil.setOpTypeToTxMeta(tr, "modify");
+    objectMap.set(id, object.toObject());
+  }, clientOrigin);
+};
+
 export const sender = {
   sendAddedObject,
   sendRemovedObject,
+  sendModifiedObject,
 };

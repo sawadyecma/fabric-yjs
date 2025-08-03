@@ -31,12 +31,12 @@ const clearAndReceiveAllObjects = async (yDocStore: YDocStoreType) => {
 
 const receiveAddedObject = (object: fabric.FabricObject) => {
   const { canvas } = getFabricCanvas();
+  console.log("receiveAddedObject", object);
 
   const asyncFn = async () => {
     const fabricObjects = await fabric.util.enlivenObjects([object]);
     const fabricObject = fabricObjects[0];
     if (!(fabricObject instanceof fabric.FabricObject)) {
-      console.warn("Enlivened object is not a FabricObject:", fabricObject);
       return;
     }
 
@@ -59,8 +59,33 @@ const receiveRemovedObject = (id: string) => {
   fabricHandlerManager.startHandlers();
 };
 
+const receiveModifiedObject = (object: fabric.FabricObject) => {
+  const { canvas } = getFabricCanvas();
+
+  const asyncFn = async () => {
+    const fabricObjects = await fabric.util.enlivenObjects([object]);
+    const fabricObject = fabricObjects[0];
+    if (!(fabricObject instanceof fabric.FabricObject)) {
+      return;
+    }
+
+    if (!fabricObject.id) {
+      console.warn(
+        "receiveModifiedObject: fabricObject.id not found",
+        fabricObject
+      );
+      return;
+    }
+
+    canvas.replace(fabricObject.id, fabricObject);
+  };
+
+  asyncFn();
+};
+
 export const receiver = {
   clearAndReceiveAllObjects,
   receiveAddedObject,
   receiveRemovedObject,
+  receiveModifiedObject,
 };

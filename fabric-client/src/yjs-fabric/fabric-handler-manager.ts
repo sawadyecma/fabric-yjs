@@ -1,13 +1,16 @@
 import * as fabric from "fabric";
 import { sender } from "./sender";
+import { getAbsPropsFromActiveSelection } from "../fabric/active-selection";
 
 type ObjectAddedHandler = (event: { target: fabric.FabricObject }) => void;
 type ObjectRemovedHandler = (event: { target: fabric.FabricObject }) => void;
+type ObjectModifiedHandler = (event: { target: fabric.FabricObject }) => void;
 
 export class FabricHanlderManager {
   private handlers: {
     objectAdded: ObjectAddedHandler;
     objectRemoved: ObjectRemovedHandler;
+    objectModified: ObjectModifiedHandler;
   };
   private canvas: fabric.Canvas;
 
@@ -27,9 +30,28 @@ export class FabricHanlderManager {
       sender.sendRemovedObject(removedObject);
     };
 
+    const objectModifiedHandler: ObjectModifiedHandler = async (event) => {
+      const modifiedObject = event.target;
+      if (modifiedObject instanceof fabric.ActiveSelection) {
+        const selectionMatrix = modifiedObject.calcTransformMatrix();
+
+        const objects = modifiedObject.getObjects();
+        for (const obj of objects) {
+          const cloned = await obj.clone();
+          const absProps = getAbsPropsFromActiveSelection(obj, selectionMatrix);
+          cloned.set(absProps);
+          sender.sendModifiedObject(cloned);
+        }
+        return;
+      }
+
+      sender.sendModifiedObject(modifiedObject);
+    };
+
     this.handlers = {
       objectAdded: objectAddedHandler,
       objectRemoved: objectRemovedHandler,
+      objectModified: objectModifiedHandler,
     };
 
     this.canvas = canvas;
@@ -40,11 +62,13 @@ export class FabricHanlderManager {
   startHandlers() {
     this.canvas.on("object:added", this.handlers.objectAdded);
     this.canvas.on("object:removed", this.handlers.objectRemoved);
+    this.canvas.on("object:modified", this.handlers.objectModified);
   }
 
   stopHandlers() {
     this.canvas.off("object:added", this.handlers.objectAdded);
     this.canvas.off("object:removed", this.handlers.objectRemoved);
+    this.canvas.off("object:modified", this.handlers.objectModified);
   }
 }
 

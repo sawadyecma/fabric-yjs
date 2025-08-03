@@ -22,10 +22,9 @@ export const initFabric = () => {
 
   const canvas = new AppCanvas(canvasEle, {
     backgroundColor: "#f0f0f0",
+    // ドラッグ選択でオブジェクトを選ぶときに「選択範囲にどれだけ入っているか」を判定する基準を制御するためのプロパティ
+    selectionFullyContained: true,
   });
-
-  canvas.isDrawingMode = true;
-  canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
 
   canvas.requestRenderAll();
 

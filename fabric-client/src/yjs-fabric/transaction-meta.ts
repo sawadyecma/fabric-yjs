@@ -10,7 +10,7 @@ const KEY_OPERATION_TYPE = "operationType";
 
 const OPERATION = {
   ADD: "add",
-  UPDATE: "update",
+  MODIFY: "modify",
   REMOVE: "remove",
 } as const;
 

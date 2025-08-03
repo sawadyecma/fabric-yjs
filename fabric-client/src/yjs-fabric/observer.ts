@@ -10,11 +10,19 @@ import type {
   YDocStoreType,
 } from "./type";
 
-const observeObjectMap: ObserveObjectMapFn = (event, _transaction) => {
-  // const { objectMap } = getYDocStore();
-  // console.log(event, transaction);
-  event.keysChanged.forEach((_key) => {
-    // TODO
+const observeObjectMap: ObserveObjectMapFn = (event, transaction) => {
+  if (transaction.origin === clientOrigin) {
+    // opTypeは同じクライアントでしか取得できないため、注意
+    const opType = txMetaUtil.getOpTypeFromTxMeta(transaction);
+    if (opType === "modify") return;
+  }
+
+  const { objectMap } = getYDocStore();
+
+  event.keysChanged.forEach((key) => {
+    const object = objectMap.get(key);
+    if (!object) return;
+    receiver.receiveModifiedObject(object);
   });
   return;
 };
@@ -41,6 +49,8 @@ const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
 
       const inserts: string[] = delta.insert;
       inserts.forEach((key) => {
+        // すでに追加されているオブジェクトは、追加しない
+        // 並び替えの時は状況は変わるかも
         const object = objectMap.get(key);
         if (!object) return;
         receiver.receiveAddedObject(object);
