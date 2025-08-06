@@ -4,7 +4,6 @@ import * as fabric from "fabric";
 import { ActiveSelection } from "fabric";
 import { showToast } from "../dom/toast";
 import { getFabricCanvas } from "../fabric/init-fabric";
-import { clientOrigin } from "./clientOrigin";
 import { getYDocStore } from "./createYDocStore";
 import { receiver } from "./receiver";
 import { txMetaUtil } from "./transaction-meta";
@@ -15,13 +14,8 @@ import type {
 } from "./type";
 
 const observeObjectMap: ObserveObjectMapFn = (event, transaction) => {
-  if (transaction.origin === clientOrigin) {
-    // opTypeは同じクライアントでしか取得できないため、注意
-    const opType = txMetaUtil.getOpTypeFromTxMeta(transaction);
-    if (opType === "modify") return;
-    if (opType === "add") return;
-    if (opType === "remove") return;
-    if (opType === "bring-object-front") return;
+  if (transaction.local) {
+    return;
   }
 
   const { objectMap } = getYDocStore();
@@ -50,7 +44,7 @@ const checkHasDeleteAndInsert = (delta: YEvent<Y.Array<string>>["delta"]) => {
 
 const observeObjectOrder: ObserveObjectOrderFn = (event, transaction) => {
   console.log("delta", event.delta);
-  if (transaction.origin === clientOrigin) {
+  if (transaction.local) {
     // 結局、fabric.js→Yjsの変換が綺麗にまとまる
     return;
 
