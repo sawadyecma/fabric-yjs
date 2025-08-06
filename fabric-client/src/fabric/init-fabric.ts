@@ -5,10 +5,12 @@ import { AppCanvas } from "./AppCanvas";
 declare module "fabric" {
   interface FabricObject {
     id?: string;
+    skipFire?: boolean;
   }
 
   interface SerializedObjectProps {
     id?: string;
+    skipFire?: boolean;
   }
 }
 fabric.FabricObject.customProperties = ["id"];

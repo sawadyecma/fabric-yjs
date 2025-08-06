@@ -65,11 +65,11 @@ export class FabricHanlderManager {
     this.canvas.on("object:modified", this.handlers.objectModified);
   }
 
-  stopHandlers() {
-    this.canvas.off("object:added", this.handlers.objectAdded);
-    this.canvas.off("object:removed", this.handlers.objectRemoved);
-    this.canvas.off("object:modified", this.handlers.objectModified);
-  }
+  // stopHandlers() {
+  //   this.canvas.off("object:added", this.handlers.objectAdded);
+  //   this.canvas.off("object:removed", this.handlers.objectRemoved);
+  //   this.canvas.off("object:modified", this.handlers.objectModified);
+  // }
 }
 
 let fabricHandlerManager: FabricHanlderManager | null = null;
