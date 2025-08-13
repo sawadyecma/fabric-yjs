@@ -23,17 +23,13 @@ const clearAndReceiveAllObjects = async () => {
 const receiveAddedObject = async (object: fabric.FabricObject) => {
   const { canvas } = getFabricCanvas();
 
-  const asyncFn = async () => {
-    const fabricObjects = await fabric.util.enlivenObjects([object]);
-    const fabricObject = fabricObjects[0];
-    if (!(fabricObject instanceof fabric.FabricObject)) {
-      return;
-    }
+  const fabricObjects = await fabric.util.enlivenObjects([object]);
+  const fabricObject = fabricObjects[0];
+  if (!(fabricObject instanceof fabric.FabricObject)) {
+    return;
+  }
 
-    canvas.addWithoutFire(fabricObject);
-  };
-
-  await asyncFn();
+  canvas.addWithoutFire(fabricObject);
 };
 
 const receiveRemovedObject = (id: string) => {
