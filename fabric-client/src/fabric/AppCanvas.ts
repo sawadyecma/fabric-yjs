@@ -20,6 +20,7 @@ export class AppCanvas extends fabric.Canvas {
 
   _onObjectAdded(obj: fabric.FabricObject): void {
     if (obj.skipFire) {
+      /** copied from fabric.StaticCanvas */
       if (obj.canvas && (obj.canvas as fabric.StaticCanvas) !== this) {
         console.warn(
           "Canvas is trying to add an object that belongs to a different canvas.\n" +
